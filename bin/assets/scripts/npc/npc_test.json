@@ -1,0 +1,9 @@
+{
+    "sprite": "assets/debug/test_cube.png",
+    "onUse": {
+        "action": "dialogueOpen",
+        "dialogueBoxType" : 0,
+        "messageFile": "assets/text/test_dialogue.json"
+    }
+
+}

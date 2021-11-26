@@ -1,0 +1,7 @@
+
+/Release/*
+/Debug/*
+/bin/main.exe
+/bin/main.pdb
+/lib/*.dll
+*.vcxproj*
