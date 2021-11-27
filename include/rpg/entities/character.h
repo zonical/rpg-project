@@ -1,7 +1,8 @@
-#include "rpg/entity.h"
-#include "SDL/SDL.h"
 #ifndef CHAR_H_ENTITY
 #define CHAR_H_ENTITY
+
+#include "rpg/entity.h"
+#include "SDL/SDL.h"
 
 class Character : public Entity
 {

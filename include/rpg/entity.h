@@ -36,15 +36,15 @@ public:
         float top1, top2;
         float bottom1, bottom2;
 
-        left1 = this->x();
-        right1 = this->x() + this->w();
-        top1 = this->y();
-        bottom1 = this->y() + this->h();
+        left1 = this->levelX;
+        right1 = this->levelX + this->w();
+        top1 = this->levelY;
+        bottom1 = this->levelY + this->h();
 
-        left2 = ent->x();
-        right2 = ent->x() + ent->w();
-        top2 = ent->y();
-        bottom2 = ent->y() + ent->h();
+        left2 = ent->levelX;
+        right2 = ent->levelX + ent->w();
+        top2 = ent->levelY;
+        bottom2 = ent->levelY + ent->h();
 
         if      ( bottom1 <= top2 ) return false;
         if      ( top1 >= bottom2 ) return false;

@@ -101,8 +101,6 @@ void Character::HandleMovement()
 void Character::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
     // Render our character.
-    printf("X: %f Y: %f lX: %f lY: %f cX: %f cY: %f\n",
-        destinationRect.x, destinationRect.y, levelX, levelY, GameEngine->gRenderer.camera.x, GameEngine->gRenderer.camera.y);
     SDL_RenderCopyF(ren, this->texture, NULL, &destinationRect);
     return;
 }
