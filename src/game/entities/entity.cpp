@@ -1,27 +1,20 @@
 #include "rpg/engine.h"
-#include "rpg/player.h"
 #include "rpg/entity.h"
 
 Entity::Entity()
 {
-    GameEngine->RegisterEntity(this);
     this->AddTag(Tag_Entity);
 }
 
-Entity::~Entity()
+void Engine::RegisterGlobalEntity(Entity* ent)
 {
-    GameEngine->RemoveEntity(this);
-}
-
-void Engine::RegisterEntity(Entity* ent)
-{
-    // Adds an entity to the global register..
+    // Adds an entity to the global register.
     gEntities.push_back(ent);
     ent->OnEntitySpawned();
     printf("[ENTITY] Entity registered.\n");
 }
 
-void Engine::RemoveEntity(Entity* ent)
+void Engine::RemoveGlobalEntity(Entity* ent)
 {
     // Removes an entity to the global register.
     auto it = std::find(gEntities.begin(), gEntities.end(), ent);

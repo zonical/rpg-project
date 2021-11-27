@@ -2,14 +2,17 @@
 #define GUI_BASE_H
 
 #include "SDL/SDL.h"
-#include "rpg/tags.h"
+#include "rpg/taggable.h"
+#include "rpg/renderable.h"
+#include "rpg/inputtable.h"
 
 #include <list>
 #include <array>
 
 #define MAX_GUI_LAYERS 16
 
-class GUIElement : public Taggable
+class GUIElement 
+    : public Taggable, public Renderable, public Inputtable
 {
 public:
     // Default constructors and deconstructors.
@@ -32,34 +35,11 @@ public:
     void AddChildElement(GUIElement*);
     void RemoveChildElement(GUIElement*);
 
-    // This is the main rendering function for everything related to this element.
-    virtual void DrawElement(SDL_Window*, SDL_Renderer*) {};
 
     // Updating and logic.
     virtual void Update(float deltaTime) {};
     float nextUpdate;   // If there is to be a delay in processing the logic in the
                         // Think function, have an already defined variable for it.
-
-    virtual void OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released, bool repeat) {};
-    virtual void OnMouseMotion(int x, int y, int xrel, int yrel, Uint32 state) {};
-    virtual void OnMouseButtonPressed(bool pressed, bool released, int button, int clicks, int x, int y) {};
-    virtual void OnMouseWheelScrolled(int x, int y, int direction) {};
-
-    // Positioning.
-
-    // X value of this element.
-    float x() { return destinationRect.x; }
-    float y() { return destinationRect.y; }
-
-    float originX() { return destinationRect.x + (destinationRect.w / 2); }
-    float originY() { return destinationRect.y + (destinationRect.h / 2); }
-
-    // This is a float-rectangle used for positioning of this element.
-    SDL_FRect    destinationRect;
-
-    // Size value grabbers.
-    float w() { return destinationRect.w; }
-    float h() { return destinationRect.h; }
 };
 
 class GUI

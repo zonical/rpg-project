@@ -4,24 +4,21 @@
 #ifndef CHAR_H_GAMESTATE_LOGIC
 #define CHAR_H_GAMESTATE_LOGIC
 
-class GameStateLogic : public Entity
+class GameStateLogic
 {
 private:
     // Private character object that we own and will manage here.
     // The Player class will have access to this as we'll assign it
     // to them as their pawn.
-    Character* character;
+    Character* character = NULL;
 public:
     // Initalizer.
     GameStateLogic();
-
-    ~GameStateLogic()
-    {
-        GameEngine->RemoveEntity(this);
-    }
-
-    void OnEntitySpawned();
-    void OnEntityDestroyed();
+    void InitalizeLoading();
+    void InitalizeOverworld();
+    void InitalizeBattle();
+    void InitalizeMainMenu();
+    void InitalizePaused();
     void Update(float);
 };
 

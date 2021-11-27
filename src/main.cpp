@@ -122,6 +122,10 @@ void Engine::MainLoop()
     // engine->elapsedTime.
     Uint32 absoluteStartingTime = SDL_GetTicks();
 
+    Character* character = new Character();
+    character->AddTag("Moveable");
+    RegisterGlobalEntity(character);
+
 #ifdef _DEBUG
     TextSettings debugTextSettings;
     debugTextSettings.wrappingWidth = DEFAULT_SCREEN_WIDTH;
@@ -139,8 +143,6 @@ void Engine::MainLoop()
         for (auto& layer : gGUI.elements) guiElementCount += layer.size();
 
         fpsText << "FPS: " << floor(FPS) << '\n'
-            //<< "Player Pawn xPos: " << floor(player.Pawn()->x()) << '\n'
-            //<< "Player Pawn yPos: " << floor(player.Pawn()->y()) << '\n'
             << "Frame: " << frame << '\n'
             << "Elapsed Time: " << elapsedTime << '\n'
             << "Delta Time: " << deltaTime << '\n'
@@ -183,4 +185,7 @@ void Engine::MainLoop()
 #ifdef _DEBUG
     delete debugText;
 #endif
+
+    RemoveGlobalEntity(character);
+    delete character;
 }

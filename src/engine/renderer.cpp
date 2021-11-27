@@ -71,7 +71,10 @@ void Renderer::RenderEntities(std::vector<Entity*> entities)
         // Call the entities render function.
         if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
         {
-            entity->DrawEntity(window, renderer);
+            // Manipulate the destinationRect of this entity to be offset by the camera.
+            entity->destinationRect.x = entity->levelX - camera.x;
+            entity->destinationRect.y = entity->levelY - camera.y;
+            entity->Draw(window, renderer);
         }
     }
 }
@@ -87,7 +90,7 @@ void Renderer::RenderMisc()
         {
             if (element->HasTag(Tag_Renderable) || !element->HasTag(Tag_NotRendering))
             {
-                element->DrawElement(window, renderer);
+                element->Draw(window, renderer);
             }
             
         }

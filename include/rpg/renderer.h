@@ -27,7 +27,6 @@ private:
     std::map<std::pair<std::string, int>, TTF_Font*> fonts;
     void ReleaseAllFonts();
 
-
 public:
     bool            isInitalized = false;
 
@@ -49,6 +48,9 @@ public:
 
     // The main window for our application.
     SDL_Window *window = NULL;
+
+    // The camera that everything revolves around.
+    SDL_FRect camera = { 0, 0, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
 public:
     void OnPreRender();
     void RenderEntities(std::vector<Entity*>);

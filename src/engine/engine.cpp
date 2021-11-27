@@ -1,12 +1,8 @@
 #include "rpg/engine.h"
 #include "rpg/renderer.h"
 #include "rpg/entity.h"
-#include "rpg/player.h"
 #include "rpg/entities/character.h"
-#include "rpg/tags.h"
-
-// TEMP
-#include "rpg/gui/textbox.h"
+#include "rpg/taggable.h"
 
 #include <string>
 #include <fstream>
