@@ -82,8 +82,8 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
     }
 
     // Create a tileset from the surface.
-    SDL_tileset* tileset = IMG_Loadtileset(EngineResources.renderer, tilesetPath.c_str());
-    if (tileset == NULL)
+    SDL_Texture* texture = IMG_LoadTexture(EngineResources.renderer, tilesetPath.c_str());
+    if (texture == NULL)
     {
         printf("[ERROR] Could not create tileset for tileset %s: %s.\n", tilesetPath.c_str(), IMG_GetError());
         return false;
@@ -91,7 +91,7 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
 
     // Get the width and height of the original tileset.
     int w, h;
-    SDL_Querytileset(tileset, NULL, NULL, &w, &h);
+    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
 
     // If this tileset already exists in our map, remove it first, and then
     // put in this new tileset.
@@ -103,7 +103,7 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
 
     // Start constructing our tileset.
     Tileset tileset;
-    tileset.tilesetTiles = tileset;
+    tileset.textureTiles = texture;
 
     // Construct our tileset. The size for each tile in our tileset is a 64x64 rectangle.
     // We read strictly from left to right and then top to bottom.
@@ -118,7 +118,7 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
             TileData tile;
             tile.rect.x = 64 * x;
             tile.rect.y = 64 * y;
-            tile.tileTexture = tileset;
+            tile.tileTexture = texture;
 
             // Add our tile ot the tileset.
             tileset.tiles.push_back(tile);
