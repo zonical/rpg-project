@@ -8,12 +8,12 @@
 
 Text::Text()
 {
-
 }
 
 Text::Text(int layer, TextSettings settings) : GUIElement(layer)
 {
     this->AddTag("Text");
+    this->AddTag(Tag_Renderable);
     this->text = settings.text;
     this->textColor = settings.color;
     this->destinationRect.x = settings.x;
@@ -46,11 +46,15 @@ bool Text::CreateTextTexture()
     // If we do NOT have any font loaded for this element, load a default.
     if (font == NULL)
     {
-        font = GameEngine->gRenderer.GetFont(DEFAULT_FONT, DEFAULT_FONT_SIZE);
+        font = EngineResources.fonts.GetFont(DEFAULT_FONT, DEFAULT_FONT_SIZE);
 
         // If our font STILL equals null, cancel making the texture.
-        printf("[TEXT-ERROR] Failed to grab font.\n");
-        return false;
+        if (font == NULL)
+        {
+            printf("[TEXT-ERROR] Failed to grab font.\n");
+            return false;
+        }
+
     }
 
     // Because of SDL_tff crud, if we don't set a default string and leave it
@@ -73,13 +77,13 @@ bool Text::CreateTextTexture()
 
     // Create a texture from the surface.
     // If we don't have a renderer, return.
-    if (GameEngine->gRenderer.renderer == NULL)
+    if (EngineResources.renderer == NULL)
     {
         printf("[TEXT-ERROR] Failed to create surface for text message, missing Renderer: %s\n", text.c_str());
         return false;
     }
 
-    texture = SDL_CreateTextureFromSurface(GameEngine->gRenderer.renderer, textSurf);
+    texture = SDL_CreateTextureFromSurface(EngineResources.renderer, textSurf);
     if (texture == NULL)
     {
         // If we have an invalid surface, return an error here.
@@ -99,7 +103,7 @@ bool Text::CreateTextTexture()
     return true;
 }
 
-void Text::DrawElement(SDL_Window* win, SDL_Renderer* ren)
+void Text::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
     // If we are having to create a new surface every frame (this might need to be done
     // if we're doing something like having dynamic text overtime like in a dialouge box)

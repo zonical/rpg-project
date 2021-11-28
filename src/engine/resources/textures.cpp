@@ -1,10 +1,36 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
-#include "rpg/renderer.h"
+#include "rpg/engine.h"
+#include "rpg/resources/texturemanager.h"
 #include <string>
 #include <map>
+#include <iostream>
+#include <filesystem>
 
-SDL_Texture* Renderer::GetTexture(std::string texturePath)
+namespace fs = std::filesystem;
+
+void TextureManager::Initalize()
+{
+    std::string path = "assets/sprites";
+    for (const auto& entry : fs::recursive_directory_iterator(path))
+    {
+        // Get the path as a string.
+        std::string path = entry.path().string();
+
+        // Replace the slashes in our path with forward slashes.
+        int stringIndex;
+        while ((stringIndex = path.find("\\")) != std::string::npos)
+        {
+            path.replace(stringIndex, std::string("/").length(), std::string("/"));
+        }
+
+        // We only load PNG files. This check is here as folders count under the iterator
+        // and we obviously can't load a folder.
+        if (path.ends_with(".png")) LoadTexture(path);
+    }
+}
+
+SDL_Texture* TextureManager::GetTexture(std::string texturePath)
 {
     // Double check to see if this texture exists.
     if (!TextureExists(texturePath)) return NULL;
@@ -14,14 +40,14 @@ SDL_Texture* Renderer::GetTexture(std::string texturePath)
     return iter->second;
 }
 
-bool Renderer::TextureExists(std::string texturePath)
+bool TextureManager::TextureExists(std::string texturePath)
 {
     // Find our texture with the texture path.
     auto iter = textures.find(texturePath);
     return !(iter == textures.end());
 }
 
-bool Renderer::RemoveTexture(std::string texturePath)
+bool TextureManager::RemoveTexture(std::string texturePath)
 {
     // Double check to see if this texture exists.
     if (!TextureExists(texturePath)) return false;
@@ -37,7 +63,7 @@ bool Renderer::RemoveTexture(std::string texturePath)
     return true;
 }
 
-void Renderer::ReleaseAllTextures()
+void TextureManager::ReleaseAllTextures()
 {
     // Loop through all of our textures and release them.
     for (std::map<std::string, SDL_Texture*>::iterator iter = textures.begin();
@@ -47,9 +73,9 @@ void Renderer::ReleaseAllTextures()
     }
 }
 
-bool Renderer::LoadTexture(std::string texturePath)
+bool TextureManager::LoadTexture(std::string texturePath)
 {
-    if (renderer == NULL)
+    if (EngineResources.renderer == NULL)
     {
         // Stop.
         printf("[ERROR] Could not load texture %s.\n", texturePath.c_str());
@@ -57,7 +83,7 @@ bool Renderer::LoadTexture(std::string texturePath)
     }
 
     // Create a texture from the surface.
-    SDL_Texture* texture = IMG_LoadTexture(renderer, texturePath.c_str());
+    SDL_Texture* texture = IMG_LoadTexture(EngineResources.renderer, texturePath.c_str());
     if (texture == NULL) 
     {
         printf("[ERROR] Could not create texture %s: %s.\n", texturePath.c_str(), IMG_GetError());

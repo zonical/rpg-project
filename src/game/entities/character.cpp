@@ -1,5 +1,5 @@
 #include "SDL/SDL.h"
-#include "rpg/renderer.h"
+#include "rpg/resources.h"
 #include "rpg/engine.h"
 #include "rpg/entities/character.h"
 
@@ -15,7 +15,7 @@ Character::Character() : Entity()
     this->AddTag(Tag_Renderable);
     this->AddTag(Tag_Collision);
 
-    texture = GameEngine->gRenderer.GetTexture("assets/sprites/debug/test_cube.png");
+    texture = EngineResources.textures.GetTexture("assets/sprites/debug/test_cube.png");
 }
 
 void Character::OnEntitySpawned()
@@ -75,25 +75,25 @@ void Character::HandleMovement()
     if (up)
     {
         this->levelY -= speed;
-        GameEngine->gRenderer.camera.y -= speed;
+        EngineResources.camera.y -= speed;
     }
 
     if (down)
     {
         this->levelY += speed;
-        GameEngine->gRenderer.camera.y += speed;
+        EngineResources.camera.y += speed;
     }
 
     if (left)
     {
         this->levelX -= speed;
-        GameEngine->gRenderer.camera.x -= speed;
+        EngineResources.camera.x -= speed;
     }
 
     if (right)
     {
         this->levelX += speed;
-        GameEngine->gRenderer.camera.x += speed;
+        EngineResources.camera.x += speed;
     }
 }
 

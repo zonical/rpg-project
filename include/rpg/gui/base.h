@@ -2,9 +2,9 @@
 #define GUI_BASE_H
 
 #include "SDL/SDL.h"
-#include "rpg/taggable.h"
-#include "rpg/renderable.h"
-#include "rpg/inputtable.h"
+#include "rpg/base/taggable.h"
+#include "rpg/base/renderable.h"
+#include "rpg/base/inputtable.h"
 
 #include <list>
 #include <array>

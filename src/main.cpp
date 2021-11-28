@@ -45,64 +45,18 @@ bool Engine::Initalize()
 
     // Initalize everything for our renderer, mainly our window and SDL_Renderer
     // itself. This allows us to load textures and fonts.
-    gRenderer.Initalize();
+    gResources.Initalize();
+    gResources.textures.Initalize();
+    gResources.fonts.Initalize();
+    gResources.dialogue.Initalize();
 
-    // Load everything from our manifest files. These hold references to all of our fonts
-    // and textures. We'll start with fonts.
-    using json = nlohmann::json;
-   
-    try
-    {
-        // Load the file and have it automatically be parsed by the engine.
-        auto fontsFile = LoadJSON("assets/scripts/font_manifest.json");
-
-        // Iterate over each element.
-        for (auto& el : fontsFile.items())
-        {
-            // Grab the key name.
-            auto key = el.key();
-            auto fontDefinition = el.value().get<json>();
-
-            // Our font definition is another JSON object. It contains a few primary things:
-            // The path to the file of the font from "assets/fonts..." and including the extension
-            // ".ttf". It also contains an array of sizes since we can't dynamically size these fonts
-            // without creating textures for every single size.
-            auto fontFilePath = fontDefinition["file"].get<std::string>();
-            auto fontSizes = fontDefinition["sizes"].get<std::vector<int>>();   // An array of integers.
-
-            // For each of our sizes, create a new font and store it internally.
-            for (auto& size : fontSizes) 
-            {
-                // Load the font from the file.
-                gRenderer.LoadFont(key, fontFilePath, size);
-            }
-
-        }
-
-        // Next we'll load all of our textures. This also comes from a manifest file.
-        auto texturesFile = LoadJSON("assets/scripts/texture_manifest.json");
-        auto listOfTextures = texturesFile["textures"].get<std::vector<std::string>>(); // An array of strings.
-
-        // For all of textures in this array, load them.
-        for (auto& texture : listOfTextures)
-        {
-            // Load the font from the file.
-            gRenderer.LoadTexture(texture);
-        }
-
-    }
-    catch (std::exception& exception)
-    {
-        printf("Failed to initalize Engine. %s\n", exception.what());
-        return false;
-    }
     return true;
 }
 
 void Engine::Shutdown()
 {
     // Free all of our renderer resources.
-    gRenderer.Shutdown();
+    gResources.Shutdown();
 
     // Finally, quit all of our systems.
     TTF_Quit();
@@ -129,7 +83,7 @@ void Engine::MainLoop()
 #ifdef _DEBUG
     TextSettings debugTextSettings;
     debugTextSettings.wrappingWidth = DEFAULT_SCREEN_WIDTH;
-    debugTextSettings.fixedHeight = 250;
+    debugTextSettings.fixedHeight = 350;
 
     Text* debugText = new Text(MAX_GUI_LAYERS - 1, debugTextSettings);
 #endif
@@ -148,11 +102,12 @@ void Engine::MainLoop()
             << "Delta Time: " << deltaTime << '\n'
             << "Entity Count: " << gEntities.size() << '\n'
             << "GUI Element Count: " << guiElementCount << '\n'
+            << "Character World Pos: " << character->levelX << ", " << character->levelY << '\n'
+            << "Camera Pos: " << EngineResources.camera.x << ", " << EngineResources.camera.y << '\n'
             ;
 
         debugText->SetText(fpsText.str());
 #endif
-
         frame++;
         Uint32 start = SDL_GetTicks();
 
@@ -160,10 +115,10 @@ void Engine::MainLoop()
         Update(deltaTime);
 
         // Render everything.
-        gRenderer.OnPreRender();                    // Prepare rendering stuff.
-        gRenderer.RenderEntities(gEntities);        // Render our entities.
-        gRenderer.RenderMisc();                     // Render anything else.
-        gRenderer.FinishRender();                   // Finish rendering.
+        gResources.OnPreRender();                    // Prepare rendering stuff.
+        gResources.RenderEntities(gEntities);        // Render our entities.
+        gResources.RenderMisc();                     // Render anything else.
+        gResources.FinishRender();                   // Finish rendering.
 
         Uint32 delayTime;
 

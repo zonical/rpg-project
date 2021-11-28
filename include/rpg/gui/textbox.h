@@ -5,21 +5,9 @@
 #include "rpg/gui/base.h"
 #include "rpg/gui/text.h"
 #include "rpg/engine.h"
+#include "rpg/resources/dialoguemanager.h"
 
 #define TEXTBOX_DEFINITIONS_PATH "assets/scripts/textboxes.json"
-
-struct DialogueMessage
-{
-    // The text that this message contains.
-    std::string text = "";
-
-    // How long to wait after each character is displayed before displaying the next
-    // in milliseconds.
-    float textRate = 0.0;
-
-    // Can this text be automatically skipped?
-    bool canSkip = false;
-};
 
 class Textbox : public GUIElement 
 {

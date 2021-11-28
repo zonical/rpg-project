@@ -1,11 +1,16 @@
 #pragma once
+#ifndef LEVEL_H
+#define LEVEL_H
+
+
 #include <vector>
 
 #include "SDL/SDL.h"
 
 #include "rpg/engine.h"
 #include "rpg/entity.h"
-class Level
+#include "rpg/base/renderable.h"
+class Level : public Renderable
 {
 public:
 	Level();
@@ -16,5 +21,7 @@ public:
 	std::vector < Entity* > lEntities;
 
 	// Render the level to the screen, including it's entities.
-	void DrawLevel(SDL_Window* win, SDL_Renderer* ren);
+	void Draw(SDL_Window* win, SDL_Renderer* ren);
 };
+
+#endif // !LEVEL_H

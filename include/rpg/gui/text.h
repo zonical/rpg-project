@@ -52,7 +52,7 @@ public:
         delete font;
     };
 
-    void DrawElement(SDL_Window*, SDL_Renderer*);
+    void Draw(SDL_Window*, SDL_Renderer*);
     void SetText(std::string newText) 
     { 
         text = newText; 

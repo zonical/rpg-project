@@ -1,8 +1,8 @@
 #include "rpg/engine.h"
-#include "rpg/renderer.h"
+#include "rpg/resources.h"
 #include "rpg/entity.h"
 #include "rpg/entities/character.h"
-#include "rpg/taggable.h"
+#include "rpg/base/taggable.h"
 
 #include <string>
 #include <fstream>

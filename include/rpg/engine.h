@@ -4,9 +4,9 @@
 #include "SDL/SDL.h"
 #include "json/json.hpp"
 
-#include "rpg/renderer.h"
+#include "rpg/resources.h"
 #include "rpg/entity.h"
-#include "rpg/level.h"
+#include "rpg/level/level.h"
 #include "rpg/gui/base.h"
 
 #include <stdio.h>
@@ -46,7 +46,7 @@ public:
 
     // Global objects that are split into different classes.
     std::vector< Entity* > gEntities;   // A vector of all global entities in the world.
-    Renderer    gRenderer;              // Rendering system object.
+    Resources    gResources;             // Rendering system object.
     GUI         gGUI;                   // Global GUI handler.
     
     double      elapsedTime;            // Time elapsed in 1/10ths of a second.
@@ -58,4 +58,7 @@ public:
 #define GameEngine \
     Engine::instance()
     
+#define EngineResources \
+    GameEngine->gResources
+
 #endif

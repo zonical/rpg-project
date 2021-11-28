@@ -68,49 +68,6 @@ Textbox::Textbox(int layer, int textboxType) : GUIElement(layer)
     printf("[TEXTBOX] Loaded textbox %d.\n", textboxType);
 }
 
-void Textbox::LoadDialogue(std::string filePath)
-{
-    // Load our dialouge from a script file.
-    std::string fileContents;
-    std::string tempText;
-
-    try
-    {   
-        // Load our dialogue file.
-        using json = nlohmann::json;
-        auto dialogue = GameEngine->LoadJSON(filePath);
-
-        // Grab our messages. This is stored as an array of objects.
-        auto jsonMessages = dialogue["messages"].get<std::vector<json>>();
-
-        // Loop through all of our messages and store them internally.
-        for (auto& message : jsonMessages)
-        {
-            // Create a struct that will store our data.
-            DialogueMessage dM;
-
-            // Grab our JSON data.
-            dM.textRate = message["text_rate"].get<float>();
-            dM.text = message["text_message"].get<std::string>();
-            dM.canSkip = message["can_skip"].get<bool>();
-
-            // Store it.
-            this->messages.push_back(dM);
-        }
-
-        // Set the current message we're trying to process to the first one in this list.
-        currentMessage = this->messages[0];
-        printf("[DIALOGUE] Loaded file %s containing %d messages.\n", filePath.c_str(), messages.size());
-    }
-
-    // If we run into a processing error, catch here and report.
-    catch (std::exception Exception)
-    {
-        printf("[DIALOGUE] Failed to process %s: %s\n", filePath.c_str(), Exception.what());
-    }
-   
-}
-
 void Textbox::Update(float dT)
 {
     // Have we already displayed all of our messages?

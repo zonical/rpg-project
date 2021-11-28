@@ -1,10 +1,50 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
-#include "rpg/renderer.h"
+#include "json/json.hpp"
+
+#include "rpg/engine.h"
+#include "rpg/resources/fontmanager.h"
 #include <string>
 #include <map>
 
-TTF_Font* Renderer::GetFont(std::string fontName, int size)
+void FontManager::Initalize()
+{
+    using json = nlohmann::json;
+
+    try
+    {
+        // Load the file and have it automatically be parsed by the engine.
+        auto fontsFile = GameEngine->LoadJSON("assets/scripts/font_manifest.json");
+
+        // Iterate over each element.
+        for (auto& el : fontsFile.items())
+        {
+            // Grab the key name.
+            auto& key = el.key();
+            auto fontDefinition = el.value().get<json>();
+
+            // Our font definition is another JSON object. It contains a few primary things:
+            // The path to the file of the font from "assets/fonts..." and including the extension
+            // ".ttf". It also contains an array of sizes since we can't dynamically size these fonts
+            // without creating textures for every single size.
+            auto fontFilePath = fontDefinition["file"].get<std::string>();
+            auto fontSizes = fontDefinition["sizes"].get<std::vector<int>>();   // An array of integers.
+
+            // For each of our sizes, create a new font and store it internally.
+            for (auto& size : fontSizes)
+            {
+                // Load the font from the file.
+                LoadFont(key, fontFilePath, size);
+            }
+        }
+    }
+    catch (std::exception& Exception)
+    {
+        printf("[FONTS] Failed to initalize FontManager: %s\n", Exception.what());
+    }
+}
+
+TTF_Font* FontManager::GetFont(std::string fontName, int size)
 {
     // Double check to see if this font exists.
     if (!FontExists(fontName, size)) return NULL;
@@ -14,14 +54,14 @@ TTF_Font* Renderer::GetFont(std::string fontName, int size)
     return iter->second;
 }
 
-bool Renderer::FontExists(std::string fontName, int size)
+bool FontManager::FontExists(std::string fontName, int size)
 {
     // Find our font with the font path and size.
     auto iter = fonts.find(std::make_pair(fontName, size));
     return !(iter == fonts.end());
 }
 
-bool Renderer::RemoveFont(std::string fontName, int size)
+bool FontManager::RemoveFont(std::string fontName, int size)
 {
     // Double check to see if this font exists.
     if (!FontExists(fontName, size)) return false;
@@ -37,7 +77,7 @@ bool Renderer::RemoveFont(std::string fontName, int size)
     return true;
 }
 
-void Renderer::ReleaseAllFonts()
+void FontManager::ReleaseAllFonts()
 {
     // Loop through all of our fonts and release them.
     for (std::map<std::pair<std::string, int>, TTF_Font*>::iterator iter = fonts.begin();
@@ -50,9 +90,9 @@ void Renderer::ReleaseAllFonts()
     }
 }
 
-bool Renderer::LoadFont(std::string fontName, std::string fontPath, int size)
+bool FontManager::LoadFont(std::string fontName, std::string fontPath, int size)
 {
-    if (renderer == NULL)
+    if (EngineResources.renderer == NULL)
     {
         // Stop.
         printf("[ERROR] Could not load font %s.\n", fontPath.c_str());
