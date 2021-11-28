@@ -6,18 +6,34 @@
 #include <list>
 #include <string>
 
-// Represents an internal tileset.
-class Tileset
+// Represents an individual tile in the tileset.
+struct TileData
 {
-public:
-	// A list of tiles as textures. They will be stored by ID.
-	std::list<SDL_Texture*> textureTiles;
+	// The texture for this tile.
+	SDL_Texture* tileTexture;
 
-	// Loads a tileset into the tiles array.
-	void LoadTileset(std::string file);
+	// Image rect of this tile, a 64x64 space.
+	SDL_Rect rect = { 0, 0, 64, 64 };
+};
 
-	// Destroys all of the texture tiles.
-	void FreeTiles();
+// Represents an internal tileset.
+struct Tileset
+{
+	// The image of our tileset.
+	SDL_Texture* textureTiles;
+
+	// Our list of tiles.
+	std::list < TileData > tiles;
+
+	// Releases all of our tile textures.
+	void FreeTiles()
+	{
+		for (auto& tile : tiles)
+		{
+			SDL_DestroyTexture(tile.tileTexture);
+		}
+		SDL_DestroyTexture(textureTiles);
+	}
 };
 
 #endif

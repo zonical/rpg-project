@@ -45,6 +45,11 @@ void Resources::Shutdown()
 
     // Destroy renderer.
     SDL_DestroyRenderer(renderer);
+
+    fonts.ReleaseAllFonts();
+    textures.ReleaseAllTextures();
+    tilesets.ReleaseAllTilesets();
+    
 }
 
 // Steps we need to do before we start rendering this frame.

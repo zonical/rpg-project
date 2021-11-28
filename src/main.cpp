@@ -49,6 +49,7 @@ bool Engine::Initalize()
     gResources.textures.Initalize();
     gResources.fonts.Initalize();
     gResources.dialogue.Initalize();
+    gResources.tilesets.Initalize();
 
     return true;
 }

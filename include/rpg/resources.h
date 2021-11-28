@@ -12,6 +12,7 @@
 #include "rpg/resources/texturemanager.h"
 #include "rpg/resources/fontmanager.h"
 #include "rpg/resources/dialoguemanager.h"
+#include "rpg/resources/tilesetmanager.h"
 
 #define DEFAULT_SCREEN_WIDTH    1200
 #define DEFAULT_SCREEN_HEIGHT   700
@@ -27,6 +28,9 @@ public:
 
     // Holds all of our dialogue.
     DialogueManager dialogue;
+
+    // Holds all of our tilesets.
+    TilesetManager tilesets;
 
     // The main renderer for our application.
     SDL_Renderer* renderer = NULL;
