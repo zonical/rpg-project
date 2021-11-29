@@ -27,6 +27,10 @@ public:
 	virtual void Draw(SDL_Window*, SDL_Renderer*) {};
 
     // This is a float-rectangle used for literal positioning of this entity.
-    SDL_FRect    destinationRect;
+    SDL_FRect destinationRect;
+
+    // This is an integer-rectangle used to determine what part of the sprite we want
+    // to render.
+    SDL_Rect imageRect;
 };
 #endif // !RENDERABLE_H

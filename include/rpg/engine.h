@@ -46,8 +46,9 @@ public:
 
     // Global objects that are split into different classes.
     std::vector< Entity* > gEntities;   // A vector of all global entities in the world.
-    Resources    gResources;             // Rendering system object.
-    GUI         gGUI;                   // Global GUI handler.
+    Resources       gResources;             // Rendering system object.
+    GUI             gGUI;                   // Global GUI handler.
+    Level*          gLevel;                 // The current game level.
     
     double      elapsedTime;            // Time elapsed in 1/10ths of a second.
 

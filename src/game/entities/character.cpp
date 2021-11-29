@@ -5,11 +5,12 @@
 
 Character::Character() : Entity()
 {
-    // Set the rect sizes and positions.
-    levelX = DEFAULT_SCREEN_WIDTH / 2;
-    levelY = DEFAULT_SCREEN_HEIGHT / 2;
+    // Set the rect sizes and positions
     destinationRect.w = 64;
     destinationRect.h = 64;
+
+    levelX = DEFAULT_SCREEN_WIDTH / 2 - (destinationRect.w / 2);
+    levelY = DEFAULT_SCREEN_HEIGHT / 2 - (destinationRect.h / 2);
 
     // This entity can collide with other entities.
     this->AddTag(Tag_Renderable);
@@ -45,7 +46,6 @@ void Character::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released
 
     if (released)
     {
-        printf("released\n");
         switch (keyCode)
         {
             case SDLK_w: up     = false; break;

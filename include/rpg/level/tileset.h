@@ -3,14 +3,14 @@
 #define TILESET_H
 
 #include "SDL/SDL.h"
-#include <list>
+#include <vector>
 #include <string>
 
 // Represents an individual tile in the tileset.
 struct TileData
 {
 	// The texture for this tile.
-	SDL_Texture* tileTexture;
+	std::string texture;
 
 	// Image rect of this tile, a 64x64 space.
 	SDL_Rect rect = { 0, 0, 64, 64 };
@@ -20,20 +20,15 @@ struct TileData
 struct Tileset
 {
 	// The image of our tileset.
-	SDL_Texture* textureTiles;
+	std::string texture;
 
 	// Our list of tiles.
-	std::list < TileData > tiles;
+	std::vector < TileData > tiles;
 
 	// Releases all of our tile textures.
-	void FreeTiles()
-	{
-		for (auto& tile : tiles)
-		{
-			SDL_DestroyTexture(tile.tileTexture);
-		}
-		SDL_DestroyTexture(textureTiles);
-	}
+	void FreeTiles();
+
+	TileData GetTile(int tileID) { return tiles[tileID]; }
 };
 
 #endif

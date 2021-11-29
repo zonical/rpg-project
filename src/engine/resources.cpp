@@ -49,7 +49,7 @@ void Resources::Shutdown()
     fonts.ReleaseAllFonts();
     textures.ReleaseAllTextures();
     tilesets.ReleaseAllTilesets();
-    
+  
 }
 
 // Steps we need to do before we start rendering this frame.
@@ -98,8 +98,10 @@ void Resources::RenderEntities(std::vector<Entity*> entities)
         entity->destinationRect.x = entity->levelX - camera.x;
         entity->destinationRect.y = entity->levelY - camera.y;
 
+        SDL_FRect checkRect = { entity->levelX, entity->levelY, entity->destinationRect.w, entity->destinationRect.h };
+
         // Are we in the camera's view?
-        if (!CollisionCheckF(camera, entity->destinationRect)) continue;
+        if (!CollisionCheckF(camera, checkRect)) continue;
 
         // Call the entities render function.
         if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
@@ -107,6 +109,54 @@ void Resources::RenderEntities(std::vector<Entity*> entities)
             entity->Draw(window, renderer);
         }
     }
+}
+
+// Render our level data.
+void Resources::RenderLevel(Level* level)
+{
+    if (!level) return;
+
+    // Draw our tiles.
+    for (auto& tileLayer : level->lTiles)
+    {
+        for (auto& tile : tileLayer)
+        {
+            // Manipulate the destinationRect of this tile to be offset by the camera.
+            tile->destinationRect.x = tile->levelX - camera.x;
+            tile->destinationRect.y = tile->levelY - camera.y;
+
+            SDL_FRect checkRect = { tile->levelX, tile->levelY, tile->destinationRect.w, tile->destinationRect.h };
+
+            // Are we in the camera's view?
+            if (!CollisionCheckF(camera, checkRect)) continue;
+
+            // Call the tiles' render function.
+            if (tile->HasTag(Tag_Renderable) || !tile->HasTag(Tag_NotRendering))
+            {
+                tile->Draw(window, renderer);
+            }
+        }
+    }
+
+    // Draw our entities.
+    for (auto& entity : level->lEntities)
+    {
+        // Manipulate the destinationRect of this tile to be offset by the camera.
+        entity->destinationRect.x = entity->levelX - camera.x;
+        entity->destinationRect.y = entity->levelY - camera.y;
+
+        SDL_FRect checkRect = { entity->levelX, entity->levelY, entity->destinationRect.w, entity->destinationRect.h };
+
+        // Are we in the camera's view?
+        if (!CollisionCheckF(camera, checkRect)) continue;
+
+        // Call the entities render function.
+        if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
+        {
+            entity->Draw(window, renderer);
+        }
+    }
+    return;
 }
 
 // Render any other misc things in this function here.

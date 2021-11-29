@@ -9,6 +9,7 @@
 #include "SDL/SDL_ttf.h"
 
 #include "rpg/entity.h"
+#include "rpg/level/level.h"
 #include "rpg/resources/texturemanager.h"
 #include "rpg/resources/fontmanager.h"
 #include "rpg/resources/dialoguemanager.h"
@@ -43,6 +44,7 @@ public:
 public:
     void OnPreRender();
     void RenderEntities(std::vector<Entity*>);
+    void RenderLevel(Level* level);
     void RenderMisc();
     void FinishRender();
 
