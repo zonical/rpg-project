@@ -73,7 +73,7 @@ void Engine::MainLoop()
     int frame = 0;
     int maxFPS = 60;
     double deltaTime = 0;
-    float FPS = 0.0f;
+    float FPS = 120.0f;
 
     // Get the starting time of when this loop starts. This is used for
     // engine->elapsedTime.

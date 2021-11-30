@@ -9,6 +9,7 @@ class Character : public Entity
 public:
     // Initalizer.
     Character();
+    ~Character();
 
     void OnEntitySpawned();
 

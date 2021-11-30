@@ -21,57 +21,59 @@ void Engine::Update(double dT)
 {
     SDL_Event event;
     // Poll events.
-    SDL_PollEvent(&event);
 
-    switch (event.type)
+    while (SDL_PollEvent(&event))
     {
-        // We're quitting the main application, stop the logic loop.
-        case SDL_QUIT: 
+        switch (event.type)
         {
-            stopping = true;
-            break;
-        }
-            
-        case SDL_KEYDOWN:
-        {
-            // Tell all of our entities that a key has been pressed.
-            for (auto& entity : gEntities)
+            // We're quitting the main application, stop the logic loop.
+            case SDL_QUIT:
             {
-                // Call the entities keyboard input function.
-                entity->OnKeyboardInput(event.key.keysym.sym, true, false, !(event.key.repeat));
+                stopping = true;
+                break;
             }
 
-            // Tell all of our elements that a key has been pressed.
-            for (auto& layer : gGUI.elements)
+            case SDL_KEYDOWN:
             {
-                for (auto& element : layer)
+                // Tell all of our entities that a key has been pressed.
+                for (auto& entity : gEntities)
                 {
-                    // Call the elements keyboard input function.
-                    element->OnKeyboardInput(event.key.keysym.sym, true, false, !(event.key.repeat));
+                    // Call the entities keyboard input function.
+                    entity->OnKeyboardInput(event.key.keysym.sym, true, false, !(event.key.repeat));
                 }
-            }
-            break;
-        }
 
-        case SDL_KEYUP:
-        {
-            // Tell all of our entities that a key has been released.
-            for (auto& entity : gEntities)
-            {
-                // Call the entities keyboard input function.
-                entity->OnKeyboardInput(event.key.keysym.sym, false, true, !(event.key.repeat));
-            }
-
-            // Tell all of our elements that a key has been released.
-            for (auto& layer : gGUI.elements)
-            {
-                for (auto& element : layer)
+                // Tell all of our elements that a key has been pressed.
+                for (auto& layer : gGUI.elements)
                 {
-                    // Call the elements keyboard input function.
-                    element->OnKeyboardInput(event.key.keysym.sym, false, true, !(event.key.repeat));
+                    for (auto& element : layer)
+                    {
+                        // Call the elements keyboard input function.
+                        element->OnKeyboardInput(event.key.keysym.sym, true, false, !(event.key.repeat));
+                    }
                 }
+                break;
             }
-            break;
+
+            case SDL_KEYUP:
+            {
+                // Tell all of our entities that a key has been released.
+                for (auto& entity : gEntities)
+                {
+                    // Call the entities keyboard input function.
+                    entity->OnKeyboardInput(event.key.keysym.sym, false, true, !(event.key.repeat));
+                }
+
+                // Tell all of our elements that a key has been released.
+                for (auto& layer : gGUI.elements)
+                {
+                    for (auto& element : layer)
+                    {
+                        // Call the elements keyboard input function.
+                        element->OnKeyboardInput(event.key.keysym.sym, false, true, !(event.key.repeat));
+                    }
+                }
+                break;
+            }
         }
     }
 

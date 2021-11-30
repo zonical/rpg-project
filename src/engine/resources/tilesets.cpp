@@ -118,6 +118,12 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
     int yIterations = floor(imageHeight / 64);
     int xIterations = floor(imageWidth / 64);
 
+    // Because 0 internally in Tiled as treated as "no tile", we need to create a completely
+    // blank texture that we can use as a placeholder. This file should NOT be deleted.
+    TileData blankTileData;
+    blankTileData.texture = "assets/tile/_internalBlankTile.png";
+    tileset.tiles.push_back(blankTileData);
+
     for (int y = 0; y < yIterations; y++)
     {
         for (int x = 0; x < xIterations; x++)

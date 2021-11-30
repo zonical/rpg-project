@@ -27,6 +27,9 @@ public:
 	// Load the level with it's tile and entity data.
 	bool LoadLevel(std::string levelPath);
 
+	// Functions to help with loading levels.
+	std::string CleanupSourceImage(std::string string);
+
 	// Free's all of our entities and tiles.
 	void FreeResources();
 };

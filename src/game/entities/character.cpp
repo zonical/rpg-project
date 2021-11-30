@@ -6,7 +6,7 @@
 Character::Character() : Entity()
 {
     // Set the rect sizes and positions
-    destinationRect.w = 64;
+    destinationRect.w = 32;
     destinationRect.h = 64;
 
     levelX = DEFAULT_SCREEN_WIDTH / 2 - (destinationRect.w / 2);
@@ -16,7 +16,14 @@ Character::Character() : Entity()
     this->AddTag(Tag_Renderable);
     this->AddTag(Tag_Collision);
 
-    texture = EngineResources.textures.GetTexture("assets/sprites/debug/test_cube.png");
+    texture = EngineResources.textures.GetTexture("assets/sprites/the_man.png");
+    printf("[CHARACTER] Created character.\n");
+}
+
+Character::~Character()
+{
+    SDL_DestroyTexture(texture);
+    printf("[CHARACTER] Destroyed character.\n");
 }
 
 void Character::OnEntitySpawned()

@@ -64,27 +64,10 @@ bool Level::LoadLevel(std::string levelPath)
 		// Grab the source file of the tileset.
 		auto tilesetSource = tilesetJSON["source"].get<std::string>();
 
-		
-		// Quickly fix our tileset path by removing some unneeded slashes and adding "assets/tiles"
-		// to the front of the path.
-		int stringIndex;
-		while ((stringIndex = tilesetSource.find("\\/")) != std::string::npos)
-		{
-			tilesetSource.replace(stringIndex, std::string("/").length(), std::string("/"));
-		}
-
-		// Also remove the .. in the front.
-		stringIndex = 0;
-		while ((stringIndex = tilesetSource.find("..")) != std::string::npos)
-		{
-			tilesetSource.erase(stringIndex, std::string("..").length());
-		}
-
-		// Add "assets" in the front.
-		tilesetSource = "assets" + tilesetSource;
+		// Fix up the source of the image.
+		tilesetSource = CleanupSourceImage(tilesetSource);
 
 		// Grab our tileset.
-		TilesetManager test = EngineResources.tilesets;
 		Tileset tileset = EngineResources.tilesets.GetTileset(tilesetSource);
 
 		// Grab our layers and iterate over all of them.
@@ -112,9 +95,8 @@ bool Level::LoadLevel(std::string levelPath)
 			{
 				for (int x = 0; x < layerWidth; x++)
 				{
-					// Grab our tileID.
-					int tileID = tiles[tileCount] - 1;  // A -1 is added here as internally our tiles start at 0
-														// but Tiled has them start at 1.
+					// Grab our TileData via this tiles ID.
+					int tileID = tiles[tileCount];
 
 					// Grab the internally stored TileData.
 					TileData tileData = tileset.GetTile(tileID);
@@ -133,11 +115,33 @@ bool Level::LoadLevel(std::string levelPath)
 			// Increment our layer count so we can store this.
 			layerCount++;
 		}
-		printf("[LEVELS] Loaded level %s tiles\n", levelPath.c_str());
+		printf("[LEVELS] Loaded level %s\n", levelPath.c_str());
 		return true;
 	}
 	catch (std::exception& Exception)
 	{
 		printf("[LEVELS] Failed to load level %s: %s\n", levelPath.c_str(), Exception.what());
 	}
+}
+
+std::string Level::CleanupSourceImage(std::string string)
+{
+	// Quickly fix our tileset path by removing some unneeded slashes and adding "assets/tiles"
+	// to the front of the path.
+	int stringIndex;
+	while ((stringIndex = string.find("\\/")) != std::string::npos)
+	{
+		string.replace(stringIndex, std::string("/").length(), std::string("/"));
+	}
+
+	// Also remove the .. in the front.
+	stringIndex = 0;
+	while ((stringIndex = string.find("..")) != std::string::npos)
+	{
+		string.erase(stringIndex, std::string("..").length());
+	}
+
+	// Add "assets" in the front.
+	string = "assets" + string;
+	return string;
 }
