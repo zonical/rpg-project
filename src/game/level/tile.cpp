@@ -32,5 +32,5 @@ Tile::Tile(float x, float y, TileData data)
 // Render this tile to the screen.
 void Tile::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
-	SDL_RenderCopyF(ren, texture, &imageRect, &destinationRect);
+	SDL_RenderCopyF(ren, texture.get(), &imageRect, &destinationRect);
 }

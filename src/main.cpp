@@ -16,6 +16,7 @@
 #include "rpg/gui/text.h"
 #include "rpg/entity.h"
 #include "rpg/entities/character.h"
+#include "rpg/gui/textbox.h"
 
 int main( int argc, char* args[] )
 {
@@ -29,6 +30,8 @@ int main( int argc, char* args[] )
     GameEngine->Shutdown();
     return 0;
 }
+
+#define LEVEL_PATH "assets/levels/test.json"
 
 // Initalizes EVERYTHING that is required for this game. Returns false if
 // something failed to load.
@@ -56,6 +59,7 @@ bool Engine::Initalize()
 
 void Engine::Shutdown()
 {
+
     delete gLevel;
 
     // Free all of our renderer resources.
@@ -79,48 +83,12 @@ void Engine::MainLoop()
     // engine->elapsedTime.
     Uint32 absoluteStartingTime = SDL_GetTicks();
 
-    // Create a global character.
-    Character* character = new Character();
-    character->AddTag("Moveable");
-    RegisterGlobalEntity(character);
-    
-    // Load in a level.
     gLevel = new Level();
-    gLevel->LoadLevel("assets/levels/test.json");
+    gLevel->LoadLevel("assets/levels/debug_room.json");
 
-
-#ifdef _DEBUG
-    TextSettings debugTextSettings;
-    debugTextSettings.wrappingWidth = DEFAULT_SCREEN_WIDTH;
-    debugTextSettings.fixedHeight = 350;
-
-    Text* debugText = new Text(MAX_GUI_LAYERS - 1, debugTextSettings);
-#endif
     // Main logic loop.
     while (!stopping)
     {
-#ifdef _DEBUG
-        std::stringstream fpsText;
-
-        int guiElementCount = 0;
-        for (auto& layer : gGUI.elements) guiElementCount += layer.size();
-
-        int tileCount = 0;
-        for (auto& layer : gLevel->lTiles) tileCount += layer.size();
-
-        fpsText << "FPS: " << floor(FPS) << '\n'
-            << "Frame: " << frame << '\n'
-            << "Elapsed Time: " << elapsedTime << '\n'
-            << "Delta Time: " << deltaTime << '\n'
-            << "Entity Count: " << gEntities.size() << '\n'
-            << "Tile Count: " << tileCount << '\n'
-            << "GUI Element Count: " << guiElementCount << '\n'
-            << "Character World Pos: " << character->levelX << ", " << character->levelY << '\n'
-            << "Camera Pos: " << EngineResources.camera.x << ", " << EngineResources.camera.y << '\n'
-            ;
-
-        debugText->SetText(fpsText.str());
-#endif
         frame++;
         Uint32 start = SDL_GetTicks();
 
@@ -130,7 +98,6 @@ void Engine::MainLoop()
         // Render everything.
         gResources.OnPreRender();                    // Prepare rendering stuff.
         gResources.RenderLevel(gLevel);              // Render the level.
-        gResources.RenderEntities(gEntities);        // Render our global entities.
         gResources.RenderMisc();                     // Render anything else.
         gResources.FinishRender();                   // Finish rendering.
 
@@ -151,10 +118,4 @@ void Engine::MainLoop()
         // Calculate the starting time since initalization.
         elapsedTime = (SDL_GetTicks() - absoluteStartingTime) / 100.0f;
     }
-#ifdef _DEBUG
-    delete debugText;
-#endif
-
-    RemoveGlobalEntity(character);
-    delete character;
 }

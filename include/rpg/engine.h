@@ -10,6 +10,8 @@
 #include "rpg/gui/base.h"
 
 #include <stdio.h>
+#include <string>
+#include <iostream>
 
 enum GameState
 {
@@ -29,17 +31,22 @@ private:
     // If we're stopping the main gameplay loop.
     bool stopping = false;
 
-    // Update everything.
-    void Update(double dT);
+    void        Update(double dT);  // Update everything.
+    bool        Initalize();        // The main function that initalizes all of our systems.
+    void        Shutdown();         // The function that shuts down all of our systems and frees resources.
+    void        MainLoop();         // The main game loop.
 
 public:
     // The main instance of the Engine that is globally accessable.
     static      Engine* instance();
-    
-    bool        Initalize();        // The main function that initalizes all of our systems.
-    void        Shutdown();         // The function that shuts down all of our systems and frees resources.
-    void        MainLoop();         // The main game loop.
     void        SetGameState();     // Set our current game state and call certain update functions.
+
+    // Level functions.
+    void        OnLevelLoaded();
+    void        OnLevelShutdown();
+
+    // Transitions to the level listed in gLevelTransData.
+    void        PerformLevelTransition();
 
     void        RegisterGlobalEntity(Entity* ent);    // Inserts an entity into the global list.
     void        RemoveGlobalEntity(Entity* ent);      // Removes an entity from the global list.
@@ -49,6 +56,7 @@ public:
     Resources       gResources;             // Rendering system object.
     GUI             gGUI;                   // Global GUI handler.
     Level*          gLevel;                 // The current game level.
+    LevelTransitionData gLevelTransData;    // Data for the level transitions.
     
     double      elapsedTime;            // Time elapsed in 1/10ths of a second.
 

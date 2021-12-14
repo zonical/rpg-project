@@ -6,6 +6,7 @@
 #include <map>
 #include <iostream>
 #include <filesystem>
+#include <iterator>
 
 namespace fs = std::filesystem;
 
@@ -87,13 +88,13 @@ bool DialogueManager::LoadDialogue(std::string dialoguePath)
 
         // Insert it into our list of dialogues.
         this->dialogue.insert(std::make_pair(dialoguePath, messages));
-        printf("[DIALOGUE] Loaded file %s containing %d messages.\n", dialoguePath.c_str(), messages.size());
+        std::cout << "[DIALOGUE] Loaded file " << dialoguePath.c_str() << " containing " << messages.size() << " messages." << std::endl;
     }
 
     // If we run into a processing error, catch here and report.
-    catch (std::exception Exception)
+    catch (std::exception &Exception)
     {
-        printf("[DIALOGUE] Failed to process %s: %s\n", dialoguePath.c_str(), Exception.what());
+        std::cout << "[DIALOGUE] Failed to load dialogue file " << dialoguePath.c_str() << ": " << Exception.what() << std::endl;
         return false;
     }
     return true;

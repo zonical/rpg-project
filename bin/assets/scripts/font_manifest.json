@@ -2,7 +2,7 @@
     "40573_VIDEOTER": {
         "file": "assets/fonts/40573_VIDEOTER.ttf",
         "sizes": [
-            24, 32, 48
+            16, 24, 32, 48
         ]
     }
 }

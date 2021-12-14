@@ -14,6 +14,9 @@ struct TileData
 
 	// Image rect of this tile, a 64x64 space.
 	SDL_Rect rect = { 0, 0, 64, 64 };
+
+	// The collision rectangles for this Tile.
+	std::vector < SDL_FRect > collisionRects;
 };
 
 // Represents an internal tileset.

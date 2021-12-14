@@ -9,11 +9,16 @@
 
 #include "json/json.hpp"
 
-Textbox::Textbox(int layer, int textboxType) : GUIElement(layer)
+Textbox::Textbox(int layer, std::string elementName, int textboxType) : GUIElement(layer, elementName)
 {
     this->AddTag("Textbox");
-    // Setup our textbox.
+    this->AddTag(Tag_Renderable);
+    this->guiLayer = layer;
+    this->type = textboxType;
+}
 
+void Textbox::OnElementSpawned()
+{
     // This struct is responsible for the settings on our Text element.
     TextSettings textSettings;
 
@@ -24,7 +29,7 @@ Textbox::Textbox(int layer, int textboxType) : GUIElement(layer)
         auto textboxTypes = GameEngine->LoadJSON(TEXTBOX_DEFINITIONS_PATH);
 
         // Grab our textbox type settings.
-        auto settings = textboxTypes[std::to_string(textboxType)].get<json>();
+        auto settings = textboxTypes[std::to_string(type)].get<json>();
 
         auto padding = settings["text_padding"].get<float>();
         this->borderSize = settings["borderSize"].get<float>();
@@ -32,47 +37,56 @@ Textbox::Textbox(int layer, int textboxType) : GUIElement(layer)
         // Positioning.
         destinationRect.x = settings["x"].get<float>();
         destinationRect.y = settings["y"].get<float>();
-        
+
         // Width and height of the box.
         destinationRect.w = settings["width"].get<float>();
         destinationRect.h = settings["height"].get<float>();
 
         // Width and height of the text.
         textSettings.wrappingWidth = settings["width"].get<float>() - this->borderSize - padding;
-        //textSettings.fixedHeight = destinationRect.h;
 
         textSettings.x = settings["x"].get<float>() + this->borderSize + padding;
         textSettings.y = settings["y"].get<float>() + this->borderSize + padding;
 
+        // The size of the text we should use for this box.
+        textSettings.textSize = settings["text_size"].get<int>();
+
         // Grab our background colors.
-        auto bgColor = textboxTypes["bgColor"].get<json>();
+        auto bgColor = settings["bgColor"].get<json>();
         this->bgColor.r = bgColor["r"].get<float>();
         this->bgColor.g = bgColor["g"].get<float>();
         this->bgColor.b = bgColor["b"].get<float>();
         this->bgColor.a = bgColor["a"].get<float>();
 
         // Grab our background colors.
-        auto borderColor = textboxTypes["borderColor"].get<json>();
-        this->borderColor.r = bgColor["r"].get<float>();
-        this->borderColor.g = bgColor["g"].get<float>();
-        this->borderColor.b = bgColor["b"].get<float>();
-        this->borderColor.a = bgColor["a"].get<float>();
+        auto borderColor = settings["borderColor"].get<json>();
+        this->borderColor.r = borderColor["r"].get<float>();
+        this->borderColor.g = borderColor["g"].get<float>();
+        this->borderColor.b = borderColor["b"].get<float>();
+        this->borderColor.a = borderColor["a"].get<float>();
     }
     // If we run into a processing error, catch here and report.
-    catch (std::exception &Exception)
+    catch (std::exception& Exception)
     {
         printf("[TEXTBOX] Failed to load textbox types: %s\n", Exception.what());
     }
 
-    boxText = new Text(layer+1, textSettings);
-    printf("[TEXTBOX] Loaded textbox %d.\n", textboxType);
+    std::shared_ptr<Text> ptr(
+        new Text(GameEngine->gGUI.FindFirstFreeLayer(), 
+        this->elementName + "_text", textSettings));
+    boxText = ptr;
+    GameEngine->gGUI.AddElement(ptr, ptr->guiLayer);
+    boxText->OnElementSpawned();
+
+    printf("[TEXTBOX] Loaded textbox %d.\n", type);
 }
 
 void Textbox::Update(float dT)
 {
+    if (boxText == nullptr) return;
+
     // Have we already displayed all of our messages?
     if (IsCurrentMessageFinished() || IsDialogueFinished()) return;
-
     currentMessage = messages[messagesCounter];
 
     // Should we display our next character?
@@ -132,8 +146,14 @@ bool Textbox::IsDialogueFinished()
     return messagesCounter >= messages.size();
 }
 
+void Textbox::LoadDialogue(std::string dialogue)
+{
+    this->messages = EngineResources.dialogue.GetDialogue(dialogue);
+    currentMessage = messages[0];
+}
 
-void Textbox::DrawElement(SDL_Window* win, SDL_Renderer* ren)
+
+void Textbox::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
     // Draw our background box.
     SDL_SetRenderDrawColor(ren, bgColor.r, bgColor.g, bgColor.b, bgColor.a);

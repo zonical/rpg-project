@@ -3,13 +3,14 @@
 
 #include "rpg/entity.h"
 #include "SDL/SDL.h"
+#include <memory>
 
 class Character : public Entity
 {
 public:
     // Initalizer.
     Character();
-    ~Character();
+    ~Character() {};
 
     void OnEntitySpawned();
 
@@ -23,14 +24,24 @@ public:
     // Update logic.
     void Update(float);
     void HandleMovement();
+    void HandleUsing();
+    void Move(float x, float y);
+    void ForcePosition(float x, float y);
 
 private:
-    SDL_Texture* texture;
+    int lastValidDirection = 0;
+    float lastValidX;
+    float lastValidY;
+
+    std::shared_ptr<SDL_Texture> texture;
 
     bool up = false;
     bool down = false;
     bool left = false;
     bool right = false;
+    bool use = false;
+    
+    SDL_FRect collisionRect;
 };
 
 #endif

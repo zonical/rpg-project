@@ -1,10 +1,12 @@
 #ifndef TEXT_H
 #define TEXT_H
-#include <string>
+
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
 #include "rpg/gui/base.h"
 #include "rpg/engine.h"
+#include <memory>
+#include <string>
 
 #define DEFAULT_FONT        "40573_VIDEOTER"
 #define DEFAULT_FONT_SIZE   32
@@ -18,6 +20,7 @@ struct TextSettings
     float           fixedWidth = 0.0f;
     float           fixedHeight = 0.0f;
     int             wrappingWidth = 0.0f;
+    int             textSize;
     std::string     text = "";
     SDL_Color       color = {255, 255, 255, 255};
 };
@@ -26,18 +29,19 @@ struct TextSettings
 class Text : public GUIElement
 {
 private:
-    TTF_Font*       font = NULL;
+    std::shared_ptr<TTF_Font> font = NULL;
     SDL_Texture*    texture = NULL;
 
     std::string     text;
     SDL_Color       textColor;
 
+    int             textSize;
     int             wrappingWidth;
     bool            customHeight;
     bool            customWidth;
 public:
     Text();
-    Text(int layer, TextSettings settings);
+    Text(int layer, std::string elementName, TextSettings settings);
 
     void Init();
 
@@ -47,9 +51,7 @@ public:
 
     ~Text()
     {
-        GameEngine->gGUI.RemoveElement(this, guiLayer);
-        delete texture;
-        delete font;
+        SDL_DestroyTexture(texture);
     };
 
     void Draw(SDL_Window*, SDL_Renderer*);
@@ -63,7 +65,7 @@ public:
         textColor = newColor;
         CreateTextTexture();
     };
-    void SetFont(TTF_Font* newFont)
+    void SetFont(std::shared_ptr<TTF_Font> newFont)
     { 
         font = newFont;
         CreateTextTexture();
@@ -71,5 +73,8 @@ public:
 
     // Creates a texture and stores it internally.
     bool CreateTextTexture();
+
+    // Create our inital TextTexture on spawn.
+    void OnElementSpawned();
 };
 #endif // !TEXT_H

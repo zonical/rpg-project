@@ -2,23 +2,36 @@
 #include "rpg/gui/base.h"
 #include "rpg/engine.h"
 
-void GUI::AddElement(GUIElement* element, int layer)
+void GUI::AddElement(std::shared_ptr<GUIElement> element, int layer)
 {
-    // Adds an entity to the global register.
-    elements[layer].push_back(element);
-    printf("[GUI] GUI element registered. L: %d\n", layer);
+    elements[layer].push_back(std::move(element));
+    std::cout << "[GUI] GUI element registered." << std::endl;
 }
 
-void GUI::RemoveElement(GUIElement* element, int layer)
+void GUI::RemoveElement(std::shared_ptr<GUIElement> element, int layer)
 {
-    // Removes an entity to the global register.
     auto it = std::find(elements[layer].begin(), elements[layer].end(), element);
     if (it != elements[layer].end())
     {
         // Remove it.
         elements[layer].erase(it);
-        printf("[GUI] GUI element removed. L: %d\n", layer);
     }
+}
+
+void GUI::RemoveElement(std::string elementName, int layer)
+{
+    std::list<std::shared_ptr<GUIElement>>::iterator it;
+    for (it = elements[layer].begin(); it != elements[layer].end(); ++it) 
+    {
+        // Does this name match?
+        if (it->get()->elementName == elementName)
+        {
+            // Yeet it.
+            elements[layer].erase(it);
+            return;
+        }
+    }
+
 }
 
 int GUI::FindFirstFreeLayer()
@@ -38,31 +51,14 @@ int GUI::FindFirstFreeLayer()
     return bestLayer;
 }
 
-GUIElement::GUIElement(int layer)
+GUIElement::GUIElement(int layer, std::string elementName)
 {
-    GameEngine->gGUI.AddElement(this, layer);
     this->AddTag(Tag_GUIElement);
     this->AddTag(Tag_Renderable);
+    this->elementName = elementName;
+    this->guiLayer = layer;
 }
 
 GUIElement::~GUIElement()
 {
-    GameEngine->gGUI.RemoveElement(this, guiLayer);
-}
-
-void GUIElement::AddChildElement(GUIElement* element)
-{
-    childrenElements.push_back(element);
-    element->AddTag(Tag_ChildGUIElement);
-}
-
-void GUIElement::RemoveChildElement(GUIElement* element)
-{
-    auto it = std::find(childrenElements.begin(), childrenElements.end(), element);
-    if (it != childrenElements.end())
-    {
-        // Remove it.
-        childrenElements.erase(it);
-        element->RemoveTag(Tag_ChildGUIElement);
-    }
 }

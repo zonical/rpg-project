@@ -109,6 +109,10 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
         RemoveTileset(imageSource);
     }
 
+    // Grab our tile information. A tile might have extra information such as collision
+    // baked into it, and we'll lump it with our TileData later on.
+    auto tilesData = tilesetData["tiles"].get<std::vector<json>>();
+
     // Start constructing our tileset.
     Tileset tileset;
     tileset.texture = imageSource;
@@ -124,6 +128,8 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
     blankTileData.texture = "assets/tile/_internalBlankTile.png";
     tileset.tiles.push_back(blankTileData);
 
+    int tileNum = 0;
+
     for (int y = 0; y < yIterations; y++)
     {
         for (int x = 0; x < xIterations; x++)
@@ -134,13 +140,42 @@ bool TilesetManager::LoadTileset(std::string tilesetPath)
             tile.rect.y = 64 * y;
             tile.texture = imageSource;
 
+            // Grab our tile data. We'll grab stuff like collision objects associated
+            // with this tile here.
+            auto tileObjData = tilesData[tileNum].get<json>();
+
+            // If we have the "objectgroup" key, we can deal with objects such as collision.
+            if (tileObjData.contains("objectgroup"))
+            {
+                // Grab our object data.
+                auto objectgroup = tileObjData["objectgroup"].get<json>();
+
+                // Grab our objects and start iterating over them.
+                for (auto object : objectgroup["objects"].get<std::vector<json>>())
+                {
+                    // Are we a collision rectangle?
+                    if (object["type"].get<std::string>() == "collision_rect")
+                    {
+                        // Construct a new rectangle and fill it in with our information.
+                        SDL_FRect rect;
+                        rect.w = object["width"].get<float>();
+                        rect.h = object["height"].get<float>();
+                        rect.x = object["x"].get<float>();  // Top left from the tile.
+                        rect.y = object["y"].get<float>();  // Top left from the tile.
+                        
+                        tile.collisionRects.push_back(rect);
+                    }
+                }
+            }
+
             // Add our tile ot the tileset.
             tileset.tiles.push_back(tile);
+            tileNum++;
         }
     }
 
     // Store this new tileset in our map.
     tilesets.insert(std::pair<std::string, Tileset>(tilesetPath, tileset));
-    printf("[TILESETS] Tileset with %d tiles loaded: %s.\n", tileset.tiles.size(), tilesetPath.c_str());
+    std::cout << "[TILESETS] Tileset with " << tileset.tiles.size() << " tiles loaded: " << tilesetPath.c_str() << std::endl;
     return true;
 }

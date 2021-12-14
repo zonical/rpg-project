@@ -6,6 +6,7 @@
 #include "rpg/gui/text.h"
 #include "rpg/engine.h"
 #include "rpg/resources/dialoguemanager.h"
+#include <memory>
 
 #define TEXTBOX_DEFINITIONS_PATH "assets/scripts/textboxes.json"
 
@@ -19,7 +20,7 @@ private:
 
     // This is the text element that displays what is currently
     // being processed.
-    Text* boxText;
+    std::shared_ptr<Text> boxText;
 
     // All of our messages that we've processed from LoadDialogue()
     // Once all messages have been displayed, this gets cleared.
@@ -40,16 +41,23 @@ private:
     // How many messages we have left to go through.
     int messagesCounter = 0;
 
+    // What type of textbox we are.
+    int type;
+
 public:
     // Constructors and deconstructors. The layer constructor will call
     // the internal GUIElement(layer) setup.
     Textbox() {};
-    Textbox(int layer, int textboxType);
+    Textbox(int layer, std::string elementName, int textboxType);
     ~Textbox()
     {
-        GameEngine->gGUI.RemoveElement(this, guiLayer);
-        delete boxText;
+        ResetText();
+        GameEngine->gGUI.RemoveElement(boxText->elementName, boxText->guiLayer);
+        this->boxText.reset();
     }
+
+    // Construct our text element when we spawn in.
+    void OnElementSpawned();
 
     // Dialogue text related functions.
     // Resets the internal values relating to the textbox and resets
@@ -68,7 +76,7 @@ public:
     void LoadDialogue(std::string file);
 
     // Base element related functions.
-    void DrawElement(SDL_Window*, SDL_Renderer*);
+    void Draw(SDL_Window*, SDL_Renderer*);
     void OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released, bool repeat);
 
     // Updates the text and controls what should be displayed when.

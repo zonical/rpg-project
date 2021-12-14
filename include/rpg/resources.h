@@ -36,6 +36,9 @@ public:
     // The main renderer for our application.
     SDL_Renderer* renderer = NULL;
 
+    // The background color we default to when rendering.
+    SDL_Color backgroundColor;
+
     // The main window for our application.
     SDL_Window *window = NULL;
 
@@ -50,5 +53,16 @@ public:
 
     bool Initalize();
     void Shutdown();
+ 
+    // Misc functions.
+    void FadeIn(float duration);
+    void FadeOut(float duration);
+
+private:
+    SDL_Rect fadeRect = { 0, 0, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
+    float fadeDuration;
+    float fadeProgress;
+    bool currentlyFading;
+
 };
 #endif

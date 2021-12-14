@@ -10,7 +10,7 @@ Text::Text()
 {
 }
 
-Text::Text(int layer, TextSettings settings) : GUIElement(layer)
+Text::Text(int layer, std::string elementName, TextSettings settings) : GUIElement(layer, elementName)
 {
     this->AddTag("Text");
     this->AddTag(Tag_Renderable);
@@ -21,14 +21,13 @@ Text::Text(int layer, TextSettings settings) : GUIElement(layer)
     this->wrappingWidth = settings.wrappingWidth;
     this->destinationRect.h = settings.fixedHeight;
     this->destinationRect.w = settings.fixedWidth;
+    this->textSize = settings.textSize;
 
     if (this->destinationRect.w > 0) customWidth = true;
     if (this->destinationRect.h > 0) customHeight = true;
-
-    Init();
 }
 
-void Text::Init()
+void Text::OnElementSpawned()
 {
     // Create the texture that represents our text.
     CreateTextTexture();
@@ -46,7 +45,7 @@ bool Text::CreateTextTexture()
     // If we do NOT have any font loaded for this element, load a default.
     if (font == NULL)
     {
-        font = EngineResources.fonts.GetFont(DEFAULT_FONT, DEFAULT_FONT_SIZE);
+        font = EngineResources.fonts.GetFont(DEFAULT_FONT, this->textSize);
 
         // If our font STILL equals null, cancel making the texture.
         if (font == NULL)
@@ -68,7 +67,7 @@ bool Text::CreateTextTexture()
 
     // Create a surface from our text and text color.
     // If we have an invalid surface, return an error here.
-    SDL_Surface* textSurf = TTF_RenderText_Blended_Wrapped(font, text.c_str(), textColor, wrappingWidth);
+    SDL_Surface* textSurf = TTF_RenderText_Blended_Wrapped(font.get(), text.c_str(), textColor, wrappingWidth);
     if (textSurf == NULL)
     {   
         printf("[TEXT-ERROR] Failed to create surface for text message: \"%s\" (%s)\n", text.c_str(), SDL_GetError());
@@ -108,8 +107,6 @@ void Text::Draw(SDL_Window* win, SDL_Renderer* ren)
     // If we are having to create a new surface every frame (this might need to be done
     // if we're doing something like having dynamic text overtime like in a dialouge box)
     // we'll do it here.
-
-    // NOTE: This is *really* expensive!
     if (!isTextStatic) CreateTextTexture();
     if (texture == NULL) return;
 

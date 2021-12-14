@@ -2,7 +2,7 @@
     "onUse": {
         "action": "dialogueOpen",
         "dialogueBoxType" : 0,
-        "messageFile": "assets/text/test_dialogue.json"
+        "messageFile": "assets/scripts/text/test_dialogue.json"
     }
 
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object>
+  <properties>
+   <property name="npc_action_file" value="assets/scripts/npc/npc_test.json"/>
+   <property name="npc_name" value="TestNPC"/>
+   <property name="npc_sprite" value="assets/sprites/debug/test_cube.png"/>
+  </properties>
+ </object>
+</template>

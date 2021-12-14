@@ -40,15 +40,16 @@ bool Resources::Initalize()
 // Release and destroy all of our resources.
 void Resources::Shutdown()
 {
+
+    fonts.ReleaseAllFonts();
+    textures.ReleaseAllTextures();
+    tilesets.ReleaseAllTilesets();
+
     // Destroy window
     SDL_DestroyWindow(window);
 
     // Destroy renderer.
     SDL_DestroyRenderer(renderer);
-
-    fonts.ReleaseAllFonts();
-    textures.ReleaseAllTextures();
-    tilesets.ReleaseAllTilesets();
   
 }
 
@@ -56,7 +57,7 @@ void Resources::Shutdown()
 void Resources::OnPreRender()
 {
     // Clear the screen, set it to black.
-    SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
+    SDL_SetRenderDrawColor( renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a );
     SDL_RenderClear( renderer );
 }
 
@@ -116,10 +117,20 @@ void Resources::RenderLevel(Level* level)
 {
     if (!level) return;
 
-    // Draw our tiles.
-    for (auto& tileLayer : level->lTiles)
+    // Offset our collision rectangles by the camera.
+    for (auto& obj : level->lCollisionR)
     {
-        for (auto& tile : tileLayer)
+        obj.collisionRect.x = obj.levelX - EngineResources.camera.x;
+        obj.collisionRect.y = obj.levelY - EngineResources.camera.y;
+    }
+
+    // There can be up to 16 different layers for both entities and tiles. To allow for
+    // tiles to overlap entities (and vice versa), we'll render the tile layer FIRST and then
+    // render entities from the bottom 0 layer to the top layer 15.
+    for (int i = 0; i < MAX_TILE_LAYERS; i++)
+    {
+        // Render our tiles.
+        for (auto & tile : level->lTiles[i])
         {
             // Manipulate the destinationRect of this tile to be offset by the camera.
             tile->destinationRect.x = tile->levelX - camera.x;
@@ -136,24 +147,24 @@ void Resources::RenderLevel(Level* level)
                 tile->Draw(window, renderer);
             }
         }
-    }
 
-    // Draw our entities.
-    for (auto& entity : level->lEntities)
-    {
-        // Manipulate the destinationRect of this tile to be offset by the camera.
-        entity->destinationRect.x = entity->levelX - camera.x;
-        entity->destinationRect.y = entity->levelY - camera.y;
-
-        SDL_FRect checkRect = { entity->levelX, entity->levelY, entity->destinationRect.w, entity->destinationRect.h };
-
-        // Are we in the camera's view?
-        if (!CollisionCheckF(camera, checkRect)) continue;
-
-        // Call the entities render function.
-        if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
+        // Render our entities.
+        for (auto& entity : level->lEntities[i])
         {
-            entity->Draw(window, renderer);
+            // Manipulate the destinationRect of this tile to be offset by the camera.
+            entity->destinationRect.x = entity->levelX - camera.x;
+            entity->destinationRect.y = entity->levelY - camera.y;
+
+            SDL_FRect checkRect = { entity->levelX, entity->levelY, entity->destinationRect.w, entity->destinationRect.h };
+
+            // Are we in the camera's view?
+            if (!CollisionCheckF(camera, checkRect)) continue;
+
+            // Call the entities render function.
+            if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
+            {
+                entity->Draw(window, renderer);
+            }
         }
     }
     return;

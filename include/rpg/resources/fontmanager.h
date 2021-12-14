@@ -7,13 +7,16 @@
 
 #include <string>
 #include <map>
+#include <memory>
+
+void DestroyFontPointer(TTF_Font* p);
 
 // Responsible for all of our fonts.
 class FontManager
 {
 private:
     // Main map that contains all of our fonts.
-    std::map<std::pair<std::string, int>, TTF_Font*> fonts;
+    std::map<std::pair<std::string, int>, std::shared_ptr<TTF_Font>> fonts;
 public:
     void Initalize();
 
@@ -27,7 +30,7 @@ public:
     // Removes a font and frees it.
     bool        RemoveFont(std::string fontName, int size);
     // Grabs a pointer to a font.
-    TTF_Font*   GetFont(std::string fontName, int size);
+    std::shared_ptr<TTF_Font> GetFont(std::string fontName, int size);
 };
 
 #endif // !FONTMANAGER_H

@@ -3,15 +3,18 @@
 #define TEXTUREMANAGER_H
 
 #include "SDL/SDL.h"
+#include <memory>
 #include <string>
 #include <map>
+
+void DestroyTexturePointer(SDL_Texture* p);
 
 // Responsible for all of our textures.
 class TextureManager
 {
 private:
 	// An internal map contianing all of our textures.
-	std::map<std::string, SDL_Texture*> textures;
+	std::map<std::string, std::shared_ptr<SDL_Texture>> textures;
 public:
 	void Initalize();
 
@@ -25,6 +28,6 @@ public:
 	// Removes a texture and frees it.
 	bool			RemoveTexture(std::string texture);
 	// Grabs a pointer to a texture.
-	SDL_Texture*	GetTexture(std::string texture);        
+	std::shared_ptr<SDL_Texture> GetTexture(std::string texture);        
 };
 #endif

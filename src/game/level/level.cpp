@@ -1,9 +1,12 @@
 #include "SDL/SDL.h"
 #include "json/json.hpp"
 #include "rpg/engine.h"
+#include "rpg/entities/npc.h"
 #include "rpg/level/level.h"
 #include "rpg/level/tile.h"
+#include "rpg/entities/door.h"
 #include "rpg/resources/tilesetmanager.h"
+#include <memory>
 
 using json = nlohmann::json;
 
@@ -16,35 +19,83 @@ Level::~Level()
 	// Unload this level. Destroy all of our entities
 	// and destroy all of our tiles.
 	FreeResources();
+
+	GameEngine->OnLevelShutdown();
+}
+
+// Grabs our character from our entity list.
+Character* Level::GetCharacter()
+{
+	for (auto& entityLayer : lEntities)
+	{
+		for (auto& entity : entityLayer)
+		{
+			if (entity->HasTag("Character"))
+			{
+				return dynamic_cast<Character*>(entity.get());
+			}
+		}
+	}
+	return nullptr;
 }
 
 void Level::FreeResources()
 {
-	// Free all of our entities.
-	for (auto& entity : lEntities)
+	// Free all of our things.
+	for (auto& layer : lTiles)
 	{
-		delete entity;
-	}
-	lEntities.clear();
-
-	// Free all of our tiles.
-	for (auto& tileLayer : lTiles)
-	{
-		for (auto& tile : tileLayer)
+		for (auto& tile : layer)
 		{
-			delete tile;
+			Tile *ptr = tile.release();
+			delete ptr;
 		}
-		tileLayer.clear();
+	}
+
+	for (auto& layer : lEntities)
+	{
+		for (auto& entity : layer)
+		{
+			Entity* ptr = entity.release();
+			delete ptr;
+		}
 	}
 }
 
 // Loads a level and populates it.
 bool Level::LoadLevel(std::string levelPath)
 {
+	// Load our level.
+	auto levelData = GameEngine->LoadJSON(levelPath);
+
+	// Construct our tileset.
+	CreateTiles(levelData);
+	std::cout << "[LEVEL] Created level tiles." << std::endl;
+
+	// Create our entities.
+	CreateEntities(levelData);
+	std::cout << "[LEVEL] Created level entities." << std::endl;
+
+	// Create our collision.
+	CreateCollision(levelData);
+	std::cout << "[LEVEL] Created level collision." << std::endl;
+
+	GameEngine->OnLevelLoaded();
+
+	return true;
+}
+
+// Loads a level and creates tiles.
+bool Level::CreateTiles(json levelData)
+{
 	try
 	{
-		// Load the file. It should be stored in JSON.
-		auto levelData = GameEngine->LoadJSON(levelPath);
+		// Set the renderer background color.
+		auto backgroundHexColor = levelData["backgroundcolor"].get<std::string>();
+		sscanf_s(backgroundHexColor.c_str(), "#%02x%02x%02x", 
+			&EngineResources.backgroundColor.r, 
+			&EngineResources.backgroundColor.g, 
+			&EngineResources.backgroundColor.b);
+		EngineResources.backgroundColor.a = 255;
 
 		// The main editing software that we can use for tilesets is called Tiled.
 		// We do have some constant rules though.
@@ -77,6 +128,11 @@ bool Level::LoadLevel(std::string levelPath)
 		// Iterate over our vector and grab our data.
 		for (auto& layer : levelLayers)
 		{
+			// Check the type of this layer. If it's not a tile layer then
+			// we can just skip it.
+			auto type = layer["type"].get<std::string>();
+			if (type != "tilelayer") continue;
+
 			// Get the height and width, this determines our x and y positioning of the tiles.
 			auto layerHeight = layer["height"].get<int>();
 			auto layerWidth = layer["width"].get<int>();
@@ -95,17 +151,35 @@ bool Level::LoadLevel(std::string levelPath)
 			{
 				for (int x = 0; x < layerWidth; x++)
 				{
+					float levelX = layerXOffset + 64 * x;
+					float levelY = layerYOffset + 64 * y;
+
 					// Grab our TileData via this tiles ID.
 					int tileID = tiles[tileCount];
 
 					// Grab the internally stored TileData.
 					TileData tileData = tileset.GetTile(tileID);
+					
+					// If we have any collision data for this tile, create a new CollisionRect object
+					// and store it in our level collision list.
+					for (auto& tileCollisionObj : tileData.collisionRects)
+					{
+						CollisionRect collision;
+						collision.collisionRect = tileCollisionObj;
+
+						// These are offset from the topleft of the tile.
+						collision.levelX = levelX + tileCollisionObj.x;
+						collision.levelY = levelY + tileCollisionObj.y;
+
+						// Insert into our list.
+						lCollisionR.push_back(collision);
+;					}
 
 					// Construct a tile.
-					Tile* tile = new Tile(layerXOffset + 64 * x, layerYOffset + 64 * y, tileData);
+					std::unique_ptr<Tile> tile(new Tile(levelX, levelY, tileData));
 
 					// Put our tile in our level list.
-					lTiles[layerCount].push_back(tile);
+					lTiles[layerCount].push_back(std::move(tile));
 
 					// Increment the tiles that we've gone through.
 					tileCount++;
@@ -115,24 +189,159 @@ bool Level::LoadLevel(std::string levelPath)
 			// Increment our layer count so we can store this.
 			layerCount++;
 		}
-		printf("[LEVELS] Loaded level %s\n", levelPath.c_str());
+		std::cout << "[LEVEL] Loaded level tiles." << std::endl;
 		return true;
 	}
 	catch (std::exception& Exception)
 	{
-		printf("[LEVELS] Failed to load level %s: %s\n", levelPath.c_str(), Exception.what());
+		std::cout << "[LEVELS] Failed to load level tiles." << " : " << Exception.what() << std::endl;
+		return false;
 	}
+	return false;
+}
+
+// Loads a level and creates collision.
+bool Level::CreateCollision(json levelData)
+{
+	try
+	{
+		// Grab our layers and iterate over all of them.
+		auto levelLayers = levelData["layers"].get<std::vector<json>>();
+		int layerCount = 0;
+
+		// Iterate over our vector and grab our data.
+		for (auto& layer : levelLayers)
+		{
+			// Check the type of this layer. If it's not an object layer then
+			// we can just skip it.
+			auto type = layer["type"].get<std::string>();
+			if (type != "objectgroup") continue;
+
+			// Grab our objects.
+			auto objects = layer["objects"].get<std::vector<json>>();
+			for (auto& object : objects)
+			{
+				// Construct special entities depending on what type they are.
+				auto type = object["type"].get<std::string>();
+
+				if (type != "collision_rect") continue;
+				
+				// Construct our rectangle.
+				CollisionRect collision;
+				collision.levelX = object["x"].get<float>();
+				collision.levelY = object["y"].get<float>();
+				collision.collisionRect.w = object["width"].get<float>();
+				collision.collisionRect.h = object["height"].get<float>();
+
+				// Put it in our list of collision objects.
+				lCollisionR.push_back(collision);
+			}
+			layerCount++;
+		}
+		return true;
+	}
+	catch (std::exception& Exception)
+	{
+		std::cout << "[LEVELS] Failed to load level collision: " << Exception.what() << std::endl;
+		return false;
+	}
+	return false;
+}
+
+// Loads a level and creates entities.
+bool Level::CreateEntities(json levelData)
+{
+	try
+	{
+		// Grab our layers and iterate over all of them.
+		auto levelLayers = levelData["layers"].get<std::vector<json>>();
+		int layerCount = 0;
+
+		// Iterate over our vector and grab our data.
+		for (auto& layer : levelLayers)
+		{
+			// Check the type of this layer. If it's not an object layer then
+			// we can just skip it.
+			auto type = layer["type"].get<std::string>();
+			if (type != "objectgroup") continue;
+
+			// Grab our objects.
+			auto objects = layer["objects"].get<std::vector<json>>();
+			for (auto& object : objects)
+			{
+				// Construct special entities depending on what type they are.
+				auto type = object["type"].get<std::string>();
+
+				// Construct our entity.
+				std::unique_ptr<Entity> entity;
+
+				// Object is a character.
+				if (type == "character")
+				{
+					// If we already have a Character entity, ignore it.
+					if (GetCharacter() != nullptr) continue;
+
+					// Create a new Character entity.
+					std::unique_ptr<Entity> ptr(new Character());
+					entity.swap(ptr);
+				}
+
+				// Object is an NPC.
+				else if (type == "npc")
+				{
+					// Start constructing our NPC.
+					std::unique_ptr<Entity> ptr = std::make_unique<NPCEntity>();
+					entity.swap(ptr);
+				}
+
+				// Object is a door.
+				else if (type == "door")
+				{
+					// Start constructing our door.
+					std::unique_ptr<Entity> ptr = std::make_unique<DoorEntity>();
+					entity.swap(ptr);
+				}
+				else if (type == "landmark")
+				{
+					// As this is a literal point on a map, we're not going to bother
+					// with creating the nessacary overhead for this entity. Instead, we'll
+					// just create a base entity instead and fill it's information with that.
+					std::unique_ptr<Entity> ptr = std::make_unique<Entity>();
+					entity.swap(ptr);
+				}
+				// This isn't an entity we recognize.
+				else continue;
+
+				// Set basic properties about our entity.
+				entity->classname = type;
+				entity->targetname = object["name"].get<std::string>();
+				entity->levelX = object["x"].get<float>();
+				entity->levelY = object["y"].get<float>();
+				entity->destinationRect.w = object["width"].get<float>();
+				entity->destinationRect.h = object["height"].get<float>();
+
+				// Do we have any special properties?
+				if (object.contains("properties")) entity->tiledProperties = object["properties"].get<std::vector<json>>();
+
+				// Push our final entity to the list of entities.
+				lEntities[layerCount].push_back(std::move(entity));
+				
+			}
+			layerCount++;
+		}
+		return true;
+	}
+	catch (std::exception& Exception)
+	{
+		std::cout << "[LEVELS] Failed to load level entities: " << Exception.what() << std::endl;
+		return false;
+	}
+	return false;
 }
 
 std::string Level::CleanupSourceImage(std::string string)
 {
-	// Quickly fix our tileset path by removing some unneeded slashes and adding "assets/tiles"
-	// to the front of the path.
 	int stringIndex;
-	while ((stringIndex = string.find("\\/")) != std::string::npos)
-	{
-		string.replace(stringIndex, std::string("/").length(), std::string("/"));
-	}
 
 	// Also remove the .. in the front.
 	stringIndex = 0;
@@ -144,4 +353,19 @@ std::string Level::CleanupSourceImage(std::string string)
 	// Add "assets" in the front.
 	string = "assets" + string;
 	return string;
+}
+
+void Level::LevelUpdate(float dT)
+{
+	// For all of our entities, check collisions between them and
+	// collision rectangles and stuff.
+	
+	for (auto& entityLayer : lEntities)
+	{
+		for (auto& entity : entityLayer)
+		{
+			// Update all of our entities.
+			entity->Update(dT);
+		}
+	}
 }

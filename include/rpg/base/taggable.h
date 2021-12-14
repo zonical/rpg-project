@@ -22,7 +22,7 @@ public:
     
     void RemoveTag(std::string tag)
     {
-        std::remove(this->tags.begin(), this->tags.end(), tag);
+        tags.erase(std::remove(this->tags.begin(), this->tags.end(), tag));
         return;
     };
 
@@ -30,17 +30,18 @@ private:
     std::vector<std::string> tags;
 };
 
-#define Tag_Collision       std::string("Collision")
+#define Tag_Collision           std::string("Collision")
 
-#define Tag_Renderable      std::string("Renderable")
-#define Tag_NotRendering    std::string("NotRendering")
+#define Tag_Renderable          std::string("Renderable")
+#define Tag_NotRendering        std::string("NotRendering")
+#define Tag_DontFollowCamera    std::string("DontFollowCamera")
 
-#define Tag_Movable         std::string("Movable")
+#define Tag_Movable             std::string("Movable")
 
-#define Tag_Entity          std::string("Entity")
-#define Tag_PlayerEntity    std::string("PlayerEntity")
-#define Tag_Global          std::string("Global")
+#define Tag_Entity              std::string("Entity")
+#define Tag_PlayerEntity        std::string("PlayerEntity")
+#define Tag_Global              std::string("Global")
 
-#define Tag_GUIElement      std::string("GUIElement")
-#define Tag_ChildGUIElement std::string("ChildToGUIElement")
+#define Tag_GUIElement          std::string("GUIElement")
+#define Tag_ChildGUIElement     std::string("ChildToGUIElement")
 #endif

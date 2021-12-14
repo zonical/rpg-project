@@ -7,6 +7,11 @@
 #include <string>
 #include <map>
 
+void DestroyFontPointer(TTF_Font* p)
+{
+    TTF_CloseFont(p);
+}
+
 void FontManager::Initalize()
 {
     using json = nlohmann::json;
@@ -40,11 +45,11 @@ void FontManager::Initalize()
     }
     catch (std::exception& Exception)
     {
-        printf("[FONTS] Failed to initalize FontManager: %s\n", Exception.what());
+        std::cout << "[FONTS] Failed to initalize FontManager: " << Exception.what() << std::endl;
     }
 }
 
-TTF_Font* FontManager::GetFont(std::string fontName, int size)
+std::shared_ptr<TTF_Font> FontManager::GetFont(std::string fontName, int size)
 {
     // Double check to see if this font exists.
     if (!FontExists(fontName, size)) return NULL;
@@ -66,11 +71,8 @@ bool FontManager::RemoveFont(std::string fontName, int size)
     // Double check to see if this font exists.
     if (!FontExists(fontName, size)) return false;
 
-    // Get the font from our map of fonts.
-    TTF_Font* font = GetFont(fontName, size);
-
-    // Destroy the font.
-    TTF_CloseFont(font);
+    // Reset our font.
+    GetFont(fontName, size).reset();
 
     // Remove this font from the map.
     fonts.erase(std::make_pair(fontName, size));
@@ -79,15 +81,7 @@ bool FontManager::RemoveFont(std::string fontName, int size)
 
 void FontManager::ReleaseAllFonts()
 {
-    // Loop through all of our fonts and release them.
-    for (std::map<std::pair<std::string, int>, TTF_Font*>::iterator iter = fonts.begin();
-        iter != fonts.end(); iter++)
-    {
-        std::pair <std::string, int> pair = iter->first;
-        RemoveFont(pair.first, pair.second);
-
-        delete iter->second;
-    }
+    fonts.clear();
 }
 
 bool FontManager::LoadFont(std::string fontName, std::string fontPath, int size)
@@ -95,30 +89,32 @@ bool FontManager::LoadFont(std::string fontName, std::string fontPath, int size)
     if (EngineResources.renderer == NULL)
     {
         // Stop.
-        printf("[ERROR] Could not load font %s.\n", fontPath.c_str());
+        std::cout << "[ERROR] Could not load font " << fontPath.c_str() << std::endl;
         return false;
     }
 
-    // Create a font from the surface.
-    TTF_Font* font = TTF_OpenFont(fontPath.c_str(), size);
-    if (font == NULL)
+    // Create a font.
+    std::shared_ptr<TTF_Font> ptr(TTF_OpenFont(fontPath.c_str(), size), &DestroyFontPointer);
+
+    if (ptr.get() == NULL)
     {
-        printf("[ERROR] Could not create font %s: %s.\n", fontName.c_str(), IMG_GetError());
+        std::cout << "[ERROR] Could not create font " << fontName.c_str() << ": " << IMG_GetError() << std::endl;
         return false;
     }
 
-    // If this font already exists in our map, remove it first, and then
-    // put in this new font.
+    // If this font already exists, assigning a new pointer to a shared_ptr will reset it for us.
     if (FontExists(fontName, size))
     {
-        // Remove it.
-        RemoveFont(fontName, size);
+        // Grab our pointer and change the value of it.
+        auto oldPtr = GetFont(fontName, size);
+        oldPtr.swap(ptr);
+        return true;
     }
 
     // Store this new font in our map.
     std::pair <std::string, int> pair = std::make_pair(fontName, size);
-    fonts.insert(std::make_pair(pair, font));
+    fonts.insert(std::make_pair(pair, ptr));
 
-    printf("[FONT] Font loaded: %s : %d.\n", fontName.c_str(), size);
+    std::cout << "[FONT] Font loaded: " << fontName.c_str() << ", " << size << std::endl;
     return true;
 }
