@@ -6,4 +6,6 @@
 /bin/main.exp
 /bin/main.lib
 /lib/*.dll
+include/
+!include/rpg
 *.vcxproj*
