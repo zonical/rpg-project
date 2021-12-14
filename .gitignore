@@ -3,7 +3,7 @@
 /Debug/*
 /bin/main.exe
 /bin/main.pdb
+/bin/main.exp
+/bin/main.lib
 /lib/*.dll
-include/
-!include/rpg
 *.vcxproj*
