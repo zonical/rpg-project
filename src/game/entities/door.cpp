@@ -30,8 +30,9 @@ void DoorEntity::Update(float dT)
 		// Don't let the character move anymore.
 		character->AddTag("DontMove");
 
-		// TODO: Perform a fade.
-		
+		if (!alreadyFaded) EngineResources.FadeToBlack(LEVEL_TRANSITION_FADE); alreadyFaded = true;
+		if (alreadyFaded && EngineResources.currentlyFading) return;
+
 		// Set our level transition data in the engine so the engine knows what
 		// to do when the next Character entity spawns in.
 		GameEngine->gLevelTransData.landmark_name = this->landmarkName;

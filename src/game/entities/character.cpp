@@ -112,6 +112,15 @@ void Character::ForcePosition(float x, float y)
     EngineResources.camera.y = levelY - (DEFAULT_SCREEN_HEIGHT / 2) + (this->h() / 2);
 }
 
+void Character::ResetAllMovement()
+{
+    up = false;
+    down = false;
+    left = false;
+    right = false;
+    use = false;
+}
+
 //sigh
 bool SDL_FIntersectRect(SDL_FRect a, SDL_FRect b)
 {
@@ -158,6 +167,9 @@ bool DoesAnythingIntersect(SDL_FRect testRect)
 
 void Character::HandleMovement()
 {
+    // If we're currently in the middle of a fade, don't do any movement.
+    if (EngineResources.currentlyFading) return;
+
     // Set the position of our collison rect.
     collisionRect.x = destinationRect.x;
     collisionRect.y = destinationRect.y + (destinationRect.h / 4);

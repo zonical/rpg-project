@@ -27,6 +27,7 @@ public:
     void HandleUsing();
     void Move(float x, float y);
     void ForcePosition(float x, float y);
+    void ResetAllMovement();
 
 private:
     int lastValidDirection = 0;

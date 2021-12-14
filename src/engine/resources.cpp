@@ -2,6 +2,7 @@
 #include "rpg/entity.h"
 #include "rpg/engine.h"
 #include <vector>
+#include <algorithm>
 
 bool Resources::Initalize()
 {
@@ -25,6 +26,7 @@ bool Resources::Initalize()
         printf( "[ERROR] Renderer could not be created! SDL_Error: %s\n", SDL_GetError() );
         return false;
     }
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     // Init PNG loading:
     if( !( IMG_Init( IMG_INIT_PNG ) ) )
@@ -186,10 +188,85 @@ void Resources::RenderMisc()
             
         }
     }
+    // We're currently attempting to perform a fade.
+    if (this->currentlyFading)
+    {
+        switch (fadeType)
+        {
+            // Fading from black to the scene.
+            case FADE_FROMBLACK:
+            {
+                fadeProgress += -fadeDelta;
+                fadeColor.a = std::max((int)fadeProgress, 0);
+
+                // If our fade is zero, stop fading.
+                if (fadeColor.a == 0)
+                {
+                    this->currentlyFading = false;
+                    fadeType = -1;
+                }
+                break;
+            }
+            // Fading from black to the scene.
+            case FADE_TOBLACK:
+            {
+                fadeProgress += fadeDelta;
+                fadeColor.a = std::min((int)fadeProgress, 255);
+
+                // If our fade is zero, stop fading.
+                if (fadeColor.a == 255)
+                {
+                    this->currentlyFading = false;
+                    fadeType = -1;
+                }
+                break;
+            }
+        }
+    }
+    SDL_SetRenderDrawColor(renderer, fadeColor.r, fadeColor.g, fadeColor.b, fadeColor.a);
+    SDL_RenderFillRect(renderer, &fadeRect);
 }
 
 // Finish rendering to the screen by actually renderign.
 void Resources::FinishRender()
 {
     SDL_RenderPresent( renderer );
+}
+
+void Resources::FadeFromBlack(float duration)
+{
+    // Are we currently fading?
+    if (this->currentlyFading) return;
+
+    // Set our SDL_Rect color to be completely black.
+    fadeColor = { 0, 0, 0, 255 };
+
+    // Get the fade delta, or transparency we should remove on each iteration.
+    // Duration is in milliseconds.
+    fadeDelta = 255 / duration;
+
+    currentlyFading = true;
+    fadeType = FADE_FROMBLACK;
+
+    // Our renderer will handle the rest from there.
+    return;
+}
+
+void Resources::FadeToBlack(float duration)
+{
+    // Are we currently fading?
+    if (this->currentlyFading) return;
+
+    // Set our SDL_Rect color to be completely black.
+    fadeColor = { 0, 0, 0, 0 };
+
+    // Get the fade delta, or transparency we should remove on each iteration.
+    // Duration is in milliseconds.
+    fadeDelta = 255 / duration;
+
+    currentlyFading = true;
+    fadeType = FADE_TOBLACK;
+
+    // Our renderer will handle the rest from there.
+    return;
 }

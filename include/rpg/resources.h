@@ -18,6 +18,9 @@
 #define DEFAULT_SCREEN_WIDTH    1200
 #define DEFAULT_SCREEN_HEIGHT   700
 
+#define FADE_FROMBLACK 0
+#define FADE_TOBLACK 1
+
 class Resources
 {
 public:
@@ -55,14 +58,16 @@ public:
     void Shutdown();
  
     // Misc functions.
-    void FadeIn(float duration);
-    void FadeOut(float duration);
+    void FadeFromBlack(float duration);
+    void FadeToBlack(float duration);
+    bool currentlyFading;
 
 private:
     SDL_Rect fadeRect = { 0, 0, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
+    SDL_Color fadeColor;
     float fadeDuration;
+    float fadeDelta;
     float fadeProgress;
-    bool currentlyFading;
-
+    int fadeType = -1;
 };
 #endif

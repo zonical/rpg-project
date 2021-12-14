@@ -31,8 +31,6 @@ int main( int argc, char* args[] )
     return 0;
 }
 
-#define LEVEL_PATH "assets/levels/test.json"
-
 // Initalizes EVERYTHING that is required for this game. Returns false if
 // something failed to load.
 bool Engine::Initalize()

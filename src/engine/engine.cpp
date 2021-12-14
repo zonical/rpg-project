@@ -22,16 +22,16 @@ void Engine::Update(double dT)
     SDL_Event event;
     // Poll events.
 
+    // If we're being marked for level transition, delete our current level and start transitioning
+    // to the next one. Don't update anything else here.
+    if (gLevel != nullptr && gLevelTransData.transitionFlag)
+    {
+        PerformLevelTransition();
+        return;
+    }
+
     while (SDL_PollEvent(&event))
     {
-        // If we're being marked for level transition, delete our current level and start transitioning
-        // to the next one. Don't update anything else here.
-        if (gLevel != nullptr && gLevelTransData.transitionFlag)
-        {
-            PerformLevelTransition();
-            return;
-        }
-
         switch (event.type)
         {
             // We're quitting the main application, stop the logic loop.
@@ -192,6 +192,9 @@ void Engine::PerformLevelTransition()
     gLevelTransData.transitionFlag = false;
     gLevelTransData.new_level = "";
     gLevelTransData.landmark_name = "";
+
+    // Fade from black.
+    gResources.FadeFromBlack(LEVEL_TRANSITION_FADE);
 }
 
 // Loads a text file and parses the contents into JSON. This is mainly useful

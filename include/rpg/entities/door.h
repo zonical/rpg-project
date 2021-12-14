@@ -19,6 +19,8 @@ public:
 	bool enabled;
 	std::string landmarkName;
 	std::string levelDestination;
+	
+	bool alreadyFaded;
 
 	// Update logic.
 	void Update(float dT);

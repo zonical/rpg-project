@@ -22,6 +22,8 @@ enum GameState
     GAMESTATE_PAUSED
 };
 
+#define LEVEL_TRANSITION_FADE 25
+
 class Engine
 {
 private:
