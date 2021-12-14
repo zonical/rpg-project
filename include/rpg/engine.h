@@ -32,14 +32,15 @@ private:
     bool stopping = false;
 
     void        Update(double dT);  // Update everything.
-    bool        Initalize();        // The main function that initalizes all of our systems.
-    void        Shutdown();         // The function that shuts down all of our systems and frees resources.
-    void        MainLoop();         // The main game loop.
 
 public:
     // The main instance of the Engine that is globally accessable.
     static      Engine* instance();
     void        SetGameState();     // Set our current game state and call certain update functions.
+
+    bool        Initalize();        // The main function that initalizes all of our systems.
+    void        Shutdown();         // The function that shuts down all of our systems and frees resources.
+    void        MainLoop();         // The main game loop.
 
     // Level functions.
     void        OnLevelLoaded();
