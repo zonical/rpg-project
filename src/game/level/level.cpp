@@ -6,6 +6,7 @@
 #include "rpg/level/tile.h"
 #include "rpg/entities/door.h"
 #include "rpg/resources/tilesetmanager.h"
+#include "rpg/states/overworld.h"
 #include <memory>
 
 using json = nlohmann::json;
@@ -20,7 +21,7 @@ Level::~Level()
 	// and destroy all of our tiles.
 	FreeResources();
 
-	GameEngine->OnLevelShutdown();
+	OverworldState::instance()->OnLevelShutdown();
 }
 
 // Grabs our character from our entity list.
@@ -69,17 +70,15 @@ bool Level::LoadLevel(std::string levelPath)
 
 	// Construct our tileset.
 	CreateTiles(levelData);
-	std::cout << "[LEVEL] Created level tiles." << std::endl;
 
 	// Create our entities.
 	CreateEntities(levelData);
-	std::cout << "[LEVEL] Created level entities." << std::endl;
 
 	// Create our collision.
 	CreateCollision(levelData);
-	std::cout << "[LEVEL] Created level collision." << std::endl;
-
-	GameEngine->OnLevelLoaded();
+	
+	std::cout << "[LEVEL] Created level " << levelPath << std::endl;
+	OverworldState::instance()->OnLevelLoaded();
 
 	return true;
 }
@@ -189,7 +188,6 @@ bool Level::CreateTiles(json levelData)
 			// Increment our layer count so we can store this.
 			layerCount++;
 		}
-		std::cout << "[LEVEL] Loaded level tiles." << std::endl;
 		return true;
 	}
 	catch (std::exception& Exception)
@@ -333,7 +331,7 @@ bool Level::CreateEntities(json levelData)
 	}
 	catch (std::exception& Exception)
 	{
-		std::cout << "[LEVELS] Failed to load level entities: " << Exception.what() << std::endl;
+		std::cout << "[LEVEL] Failed to load level entities: " << Exception.what() << std::endl;
 		return false;
 	}
 	return false;

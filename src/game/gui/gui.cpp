@@ -13,8 +13,12 @@ void GUI::RemoveElement(std::shared_ptr<GUIElement> element, int layer)
     auto it = std::find(elements[layer].begin(), elements[layer].end(), element);
     if (it != elements[layer].end())
     {
-        // Remove it.
-        elements[layer].erase(it);
+        if (element.get() == it->get())
+        {
+            // Remove it.
+            elements[layer].erase(it);
+        }
+
     }
 }
 
@@ -49,6 +53,21 @@ int GUI::FindFirstFreeLayer()
     }
 
     return bestLayer;
+}
+
+GUIElement* GUI::GetElement(std::string elementName)
+{
+    for (auto& layer : elements)
+    {
+        for (auto& element : layer)
+        {
+            if (element.get() == nullptr) continue;
+            if (element.get()->elementName == elementName)
+            {
+                return element.get();
+            }
+        }
+    }
 }
 
 GUIElement::GUIElement(int layer, std::string elementName)

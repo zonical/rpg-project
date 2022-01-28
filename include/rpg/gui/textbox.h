@@ -52,8 +52,6 @@ public:
     ~Textbox()
     {
         ResetText();
-        GameEngine->gGUI.RemoveElement(boxText->elementName, boxText->guiLayer);
-        this->boxText.reset();
     }
 
     // Construct our text element when we spawn in.

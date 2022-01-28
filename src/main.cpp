@@ -13,10 +13,8 @@
 #include "json/json.hpp"
 
 #include "rpg/engine.h"
-#include "rpg/gui/text.h"
-#include "rpg/entity.h"
-#include "rpg/entities/character.h"
-#include "rpg/gui/textbox.h"
+#include "rpg/states/mainmenu.h"
+#include "rpg/gui/menus/basemenu.h"
 
 int main( int argc, char* args[] )
 {
@@ -57,9 +55,14 @@ bool Engine::Initalize()
 
 void Engine::Shutdown()
 {
+    // Free all resources from our states.
+    gameState = nullptr;
 
-    delete gLevel;
-
+    for (auto& state : states)
+    { 
+        state->ResetState();
+    }
+   
     // Free all of our renderer resources.
     gResources.Shutdown();
 
@@ -70,19 +73,16 @@ void Engine::Shutdown()
 
 void Engine::MainLoop()
 {
+    ChangeGameState(State_MainMenu);
+
     // Initalize values keeping time and dealing with frames
     // in this loop.
-    int frame = 0;
     int maxFPS = 60;
     double deltaTime = 0;
-    float FPS = 120.0f;
 
     // Get the starting time of when this loop starts. This is used for
     // engine->elapsedTime.
     Uint32 absoluteStartingTime = SDL_GetTicks();
-
-    gLevel = new Level();
-    gLevel->LoadLevel("assets/levels/debug_room.json");
 
     // Main logic loop.
     while (!stopping)
@@ -95,7 +95,7 @@ void Engine::MainLoop()
 
         // Render everything.
         gResources.OnPreRender();                    // Prepare rendering stuff.
-        gResources.RenderLevel(gLevel);              // Render the level.
+        gResources.RenderState(gameState);     // Render the currnet state.
         gResources.RenderMisc();                     // Render anything else.
         gResources.FinishRender();                   // Finish rendering.
 
@@ -111,7 +111,7 @@ void Engine::MainLoop()
         // Calculate deltatime and FPS.
         Uint32 end = SDL_GetTicks();
         deltaTime = (float)(end - start);
-        FPS = 1000.0f / deltaTime;
+        fps = 1000.0f / deltaTime;
 
         // Calculate the starting time since initalization.
         elapsedTime = (SDL_GetTicks() - absoluteStartingTime) / 100.0f;

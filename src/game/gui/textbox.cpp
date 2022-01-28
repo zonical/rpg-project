@@ -72,10 +72,10 @@ void Textbox::OnElementSpawned()
     }
 
     std::shared_ptr<Text> ptr(
-        new Text(GameEngine->gGUI.FindFirstFreeLayer(), 
+        new Text(GameEngine->gameState->gGUI.FindFirstFreeLayer(), 
         this->elementName + "_text", textSettings));
     boxText = ptr;
-    GameEngine->gGUI.AddElement(ptr, ptr->guiLayer);
+    GameEngine->gameState->gGUI.AddElement(ptr, ptr->guiLayer);
     boxText->OnElementSpawned();
 
     printf("[TEXTBOX] Loaded textbox %d.\n", type);

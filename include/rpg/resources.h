@@ -14,12 +14,14 @@
 #include "rpg/resources/fontmanager.h"
 #include "rpg/resources/dialoguemanager.h"
 #include "rpg/resources/tilesetmanager.h"
+#include "rpg/gamestate.h"
 
 #define DEFAULT_SCREEN_WIDTH    1200
 #define DEFAULT_SCREEN_HEIGHT   700
 
 #define FADE_FROMBLACK 0
 #define FADE_TOBLACK 1
+#define FADE_HOLD 2
 
 class Resources
 {
@@ -50,7 +52,7 @@ public:
 public:
     void OnPreRender();
     void RenderEntities(std::vector<Entity*>);
-    void RenderLevel(Level* level);
+    void RenderState(BaseGameState* state);
     void RenderMisc();
     void FinishRender();
 
@@ -60,6 +62,8 @@ public:
     // Misc functions.
     void FadeFromBlack(float duration);
     void FadeToBlack(float duration);
+    void ResetFade();
+    void ApplyGlobalFade(SDL_Color color);
     bool currentlyFading;
 
 private:

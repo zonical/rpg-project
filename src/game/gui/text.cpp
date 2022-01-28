@@ -64,10 +64,19 @@ bool Text::CreateTextTexture()
         this->text = " ";
     }
 
+    SDL_Surface* textSurf;
 
     // Create a surface from our text and text color.
     // If we have an invalid surface, return an error here.
-    SDL_Surface* textSurf = TTF_RenderText_Blended_Wrapped(font.get(), text.c_str(), textColor, wrappingWidth);
+    if (text.find("\n") != std::string::npos)
+    {
+        textSurf = TTF_RenderText_Blended_Wrapped(font.get(), text.c_str(), textColor, wrappingWidth);
+    }
+    else
+    {
+        textSurf = TTF_RenderText_Blended(font.get(), text.c_str(), textColor);
+    }
+
     if (textSurf == NULL)
     {   
         printf("[TEXT-ERROR] Failed to create surface for text message: \"%s\" (%s)\n", text.c_str(), SDL_GetError());

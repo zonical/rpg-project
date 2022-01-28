@@ -2,7 +2,8 @@
 #include "rpg/resources.h"
 #include "rpg/engine.h"
 #include "rpg/entities/npc.h"
-
+#include "rpg/gamestate.h"
+#include "rpg/states/overworld.h"
 
 NPCEntity::NPCEntity() : Entity()
 {
@@ -41,7 +42,7 @@ void NPCEntity::Update(float dT)
         // Is it completely finished and the user has exited out of it?
         if (this->textbox->IsDialogueFinished())
         {
-            GameEngine->gGUI.RemoveElement(textbox->elementName, textbox->guiLayer);
+            State_Overworld->gGUI.RemoveElement(textbox->elementName, textbox->guiLayer);
             this->textbox.reset();
             OnUseFinished(useActivator);
         }
@@ -78,9 +79,9 @@ void NPCEntity::OnUse(Entity* activator)
                 auto textboxType = useObj["dialogueBoxType"].get<int>();
 
                 std::string elementName = npcName + "_textbox";
-                std::shared_ptr<Textbox> ptr(new Textbox(GameEngine->gGUI.FindFirstFreeLayer(), elementName, textboxType));
+                std::shared_ptr<Textbox> ptr(new Textbox(State_Overworld->gGUI.FindFirstFreeLayer(), elementName, textboxType));
                 textbox = ptr;
-                GameEngine->gGUI.AddElement(ptr, ptr->guiLayer);
+                State_Overworld->gGUI.AddElement(ptr, ptr->guiLayer);
                 textbox->OnElementSpawned();
 
                 // Load our dialogue.

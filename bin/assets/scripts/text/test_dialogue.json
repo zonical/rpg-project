@@ -4,17 +4,17 @@
     "messages": [
         {
             "text_rate": 0.2,
-            "text_message": "According to all known laws of aviation, there is no way a bee should be able to fly.",
+            "text_message": "According to all known laws of aviation,\nthere is no way a bee should be able to fly.",
             "can_skip": false
         },
         {
             "text_rate": 0.2,
-            "text_message": "Its wings are too small to get its fat little body off the ground.",
+            "text_message": "Its wings are too small to get its fat\nlittle body off the ground.",
             "can_skip": false
         },
         {
             "text_rate": 0.2,
-            "text_message": "The bee, of course, flies anyway; because bees don't care what humans think is impossible.",
+            "text_message": "The bee, of course, flies anyway;\nbecause bees don't care what humans\nthink is impossible.",
             "can_skip": false
         },
         {

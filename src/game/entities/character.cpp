@@ -2,6 +2,7 @@
 #include "rpg/resources.h"
 #include "rpg/engine.h"
 #include "rpg/entities/character.h"
+#include "rpg/states/overworld.h"
 
 Character::Character() : Entity()
 {
@@ -153,9 +154,9 @@ bool SDL_FIntersectRect(SDL_FRect a, SDL_FRect b)
 
 bool DoesAnythingIntersect(SDL_FRect testRect)
 {
-    if (GameEngine->gLevel == nullptr) return false;
+    if (State_Overworld->gLevel == nullptr) return false;
     // Do collision detection with all of our collision objects in the level.
-    for (auto& collisionRect : GameEngine->gLevel->lCollisionR)
+    for (auto& collisionRect : State_Overworld->gLevel->lCollisionR)
     {
         if (SDL_FIntersectRect(collisionRect.collisionRect, testRect))
         {
@@ -239,13 +240,13 @@ void Character::HandleUsing()
 {
     // Check to see our distance between all of our current level entities.
     // If we're within range, trigger the first entity and perform OnUse().
-    if (GameEngine->gLevel == nullptr) return;
+    if (State_Overworld->gLevel == nullptr) return;
 
     // If we're currently using another entity, don't process another Use
     // event until we're out of it.
     if (this->isCurrentlyUsed) return;
 
-    for (auto& entLayer : GameEngine->gLevel->lEntities)
+    for (auto& entLayer : State_Overworld->gLevel->lEntities)
     {
         for (auto& ent : entLayer)
         {

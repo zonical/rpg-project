@@ -51,6 +51,9 @@ public:
     void AddElement(std::shared_ptr<GUIElement> element, int layer);
     void RemoveElement(std::shared_ptr<GUIElement> element, int layer);
     void RemoveElement(std::string elementName, int layer);
+
+    // Grab an element by name.
+    GUIElement* GetElement(std::string elementName);
 };
 
 #endif
