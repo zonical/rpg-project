@@ -13,8 +13,6 @@
 #include <string>
 #include <iostream>
 
-#define LEVEL_TRANSITION_FADE 25
-
 class Engine
 {
 private:

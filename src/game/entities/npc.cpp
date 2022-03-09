@@ -1,8 +1,5 @@
-#include "SDL/SDL.h"
-#include "rpg/resources.h"
-#include "rpg/engine.h"
+#include "rpg/rpg.h"
 #include "rpg/entities/npc.h"
-#include "rpg/gamestate.h"
 #include "rpg/states/overworld.h"
 
 NPCEntity::NPCEntity() : Entity()

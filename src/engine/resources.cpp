@@ -1,8 +1,4 @@
-#include "rpg/resources.h"
-#include "rpg/entity.h"
-#include "rpg/engine.h"
-#include <vector>
-#include <algorithm>
+#include "rpg/rpg.h"
 
 bool Resources::Initalize()
 {

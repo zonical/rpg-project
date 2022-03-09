@@ -1,3 +1,4 @@
+#include "rpg/rpg.h"
 #include "rpg/gui/menus/basemenu.h"
 
 // Menu constructor.

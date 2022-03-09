@@ -1,11 +1,5 @@
-#include "SDL/SDL.h"
-#include "rpg/engine.h"
-#include "rpg/level/tile.h"
-
+#include "rpg/rpg.h"
 #include "rpg/states/overworld.h"
-#include "rpg/gamestate.h"
-
-#include <algorithm>
 
 // Base constructor, just adds a tag saying we should
 // render this thing.

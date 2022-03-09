@@ -1,13 +1,5 @@
-#include <string>
-#include <array>
-#include <iostream>
-#include <fstream>
-
-#include "SDL/SDL.h"
-#include "rpg/gui/base.h"
+#include "rpg/rpg.h"
 #include "rpg/gui/textbox.h"
-
-#include "json/json.hpp"
 
 Textbox::Textbox(int layer, std::string elementName, int textboxType) : GUIElement(layer, elementName)
 {

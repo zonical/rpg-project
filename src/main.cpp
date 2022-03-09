@@ -1,20 +1,10 @@
 #define SDL_MAIN_HANDLED
+#include "rpg/rpg.h"
 
-#include <stdio.h>
-#include <math.h>
-#include <algorithm>
-#include <string>
-#include <sstream>
-#include <stdlib.h>
-#include <ctime>
-#include <list>
-
-#include "SDL/SDL.h"
-#include "json/json.hpp"
-
-#include "rpg/engine.h"
 #include "rpg/states/mainmenu.h"
 #include "rpg/gui/menus/basemenu.h"
+
+#include <ctime>
 
 int main( int argc, char* args[] )
 {

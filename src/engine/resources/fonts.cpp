@@ -1,11 +1,4 @@
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
-#include "json/json.hpp"
-
-#include "rpg/engine.h"
-#include "rpg/resources/fontmanager.h"
-#include <string>
-#include <map>
+#include "rpg/rpg.h"
 
 void DestroyFontPointer(TTF_Font* p)
 {

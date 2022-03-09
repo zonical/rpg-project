@@ -1,7 +1,4 @@
-#include "SDL/SDL.h"
-#include "rpg/resources.h"
-#include "rpg/engine.h"
-#include "rpg/entities/character.h"
+#include "rpg/rpg.h"
 #include "rpg/states/overworld.h"
 
 Character::Character() : Entity()

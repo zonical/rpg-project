@@ -1,13 +1,4 @@
-#include "rpg/engine.h"
-#include "rpg/resources.h"
-#include "rpg/entity.h"
-#include "rpg/entities/character.h"
-#include "rpg/base/taggable.h"
-#include "rpg/gamestate.h"
-
-#include <string>
-#include <fstream>
-#include <iostream>
+#include "rpg/rpg.h"
 
 Engine* Engine::instance()
 {

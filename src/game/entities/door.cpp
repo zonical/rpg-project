@@ -1,4 +1,4 @@
-#include "rpg/engine.h"
+#include "rpg/rpg.h"
 #include "rpg/entities/door.h"
 #include "rpg/states/overworld.h"
 

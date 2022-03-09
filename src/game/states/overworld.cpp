@@ -1,11 +1,9 @@
-#include "rpg/engine.h"
+#include "rpg/rpg.h"
 #include "rpg/states/overworld.h"
-#include "rpg/gui/text.h"
 #include "rpg/states/mainmenu.h"
+#include "rpg/gui/text.h"
 #include "rpg/entities/light.h"
 
-#include <algorithm>
-#include <cmath>
 
 // Wake up our entities and GUI elements once everything has been constructed.
 void OverworldState::OnLevelLoaded()

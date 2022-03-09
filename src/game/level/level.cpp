@@ -1,15 +1,8 @@
-#include "SDL/SDL.h"
-#include "json/json.hpp"
-#include "rpg/engine.h"
+#include "rpg/rpg.h"
 #include "rpg/entities/npc.h"
 #include "rpg/entities/door.h"
 #include "rpg/entities/light.h"
-#include "rpg/level/level.h"
-#include "rpg/level/tile.h"
-#include "rpg/resources/tilesetmanager.h"
 #include "rpg/states/overworld.h"
-#include <memory>
-#include <thread>
 
 using json = nlohmann::json;
 

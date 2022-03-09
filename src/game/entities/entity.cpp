@@ -1,5 +1,4 @@
-#include "rpg/engine.h"
-#include "rpg/entity.h"
+#include "rpg/rpg.h"
 
 Entity::Entity()
 {

@@ -1,9 +1,4 @@
-#include <string>
-#include <array>
-#include <algorithm>
-#include "SDL/SDL.h"
-#include "SDL/SDL_ttf.h"
-#include "rpg/gui/base.h"
+#include "rpg/rpg.h"
 #include "rpg/gui/text.h"
 
 Text::Text()

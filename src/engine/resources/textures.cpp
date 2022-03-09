@@ -1,21 +1,10 @@
-#include "SDL/SDL.h"
-#include "SDL/SDL_image.h"
-#include "rpg/engine.h"
-#include "rpg/resources/texturemanager.h"
-#include <string>
-#include <map>
-#include <iostream>
-#include <filesystem>
-#include <memory>
-#include <functional>
+#include "rpg/rpg.h"
 
 namespace fs = std::filesystem;
-
 void DestroyTexturePointer(SDL_Texture* p)
 {
     SDL_DestroyTexture(p);
 }
-
 
 void TextureManager::Initalize()
 {

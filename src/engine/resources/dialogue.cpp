@@ -1,12 +1,4 @@
-#include "SDL/SDL.h"
-#include "SDL/SDL_image.h"
-#include "rpg/engine.h"
-#include "rpg/resources/dialoguemanager.h"
-#include <string>
-#include <map>
-#include <iostream>
-#include <filesystem>
-#include <iterator>
+#include "rpg/rpg.h"
 
 namespace fs = std::filesystem;
 

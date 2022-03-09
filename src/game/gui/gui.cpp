@@ -1,6 +1,4 @@
-#include <list>
-#include "rpg/gui/base.h"
-#include "rpg/engine.h"
+#include "rpg/rpg.h"
 
 void GUI::AddElement(std::shared_ptr<GUIElement> element, int layer)
 {

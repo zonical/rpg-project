@@ -1,13 +1,4 @@
-#include "SDL/SDL.h"
-#include "SDL/SDL_image.h"
-#include "json/json.hpp"
-#include "rpg/engine.h"
-#include "rpg/resources/tilesetmanager.h"
-
-#include <string>
-#include <map>
-#include <iostream>
-#include <filesystem>
+#include "rpg/rpg.h"
 
 namespace fs = std::filesystem;
 

@@ -3,6 +3,6 @@
 /Debug/*
 /bin/*
 /lib/*
-include/
-!include/rpg
+include/SDL
+include/json
 *.vcxproj*
