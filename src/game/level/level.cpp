@@ -2,12 +2,14 @@
 #include "json/json.hpp"
 #include "rpg/engine.h"
 #include "rpg/entities/npc.h"
+#include "rpg/entities/door.h"
+#include "rpg/entities/light.h"
 #include "rpg/level/level.h"
 #include "rpg/level/tile.h"
-#include "rpg/entities/door.h"
 #include "rpg/resources/tilesetmanager.h"
 #include "rpg/states/overworld.h"
 #include <memory>
+#include <thread>
 
 using json = nlohmann::json;
 
@@ -68,11 +70,11 @@ bool Level::LoadLevel(std::string levelPath)
 	// Load our level.
 	auto levelData = GameEngine->LoadJSON(levelPath);
 
-	// Construct our tileset.
-	CreateTiles(levelData);
-
 	// Create our entities.
 	CreateEntities(levelData);
+
+	// Construct our tileset.
+	CreateTiles(levelData);
 
 	// Create our collision.
 	CreateCollision(levelData);
@@ -123,6 +125,24 @@ bool Level::CreateTiles(json levelData)
 		// Grab our layers and iterate over all of them.
 		auto levelLayers = levelData["layers"].get<std::vector<json>>();
 		int layerCount = 0;
+
+		// Grab all of our lights for lighting purposes.
+		std::vector<Light*> lights;
+
+		for (int l = 0; l < MAX_TILE_LAYERS; l++)
+		{
+			for (auto& entity : lEntities[l])
+			{
+				// Only deal with lights.
+				if (!entity->HasTag("Light")) continue;
+
+				// Convert entity to Light.
+				Light* light = dynamic_cast<Light*>(entity.get());
+
+				// Store it for later.
+				lights.push_back(light);
+			}
+		}
 
 		// Iterate over our vector and grab our data.
 		for (auto& layer : levelLayers)
@@ -176,6 +196,22 @@ bool Level::CreateTiles(json levelData)
 
 					// Construct a tile.
 					std::unique_ptr<Tile> tile(new Tile(levelX, levelY, tileData));
+
+					// Create our lighting for our tile.
+					// Loop over all of our lights and calculate lighting for this tile.
+					for (auto& light : lights)
+					{
+						SDL_Color lightColor = CalculateLightingFromEntityToTile(light, tile.get(), light->colorModifier, light->intensity);
+
+						tile->colorModifier.r = (int)std::min(tile->colorModifier.r + lightColor.r, 255);
+						tile->colorModifier.g = (int)std::min(tile->colorModifier.g + lightColor.g, 255);
+						tile->colorModifier.b = (int)std::min(tile->colorModifier.b + lightColor.b, 255);
+
+						//printf("Tile: %d, RGB: %d, %d, %d, Light RGB: %d, %d, %d, %d\n",
+						//	tileCount, tile->colorModifier.r, tile->colorModifier.g, tile->colorModifier.b,
+						//	light->colorModifier.r, light->colorModifier.g, light->colorModifier.b, light->intensity);
+
+					}
 
 					// Put our tile in our level list.
 					lTiles[layerCount].push_back(std::move(tile));
@@ -307,6 +343,14 @@ bool Level::CreateEntities(json levelData)
 					std::unique_ptr<Entity> ptr = std::make_unique<Entity>();
 					entity.swap(ptr);
 				}
+				// Object is a light.
+				else if (type == "light")
+				{
+					// Start constructing our door.
+					std::unique_ptr<Entity> ptr = std::make_unique<Light>();
+					entity.swap(ptr);
+				}
+
 				// This isn't an entity we recognize.
 				else continue;
 
@@ -320,6 +364,8 @@ bool Level::CreateEntities(json levelData)
 
 				// Do we have any special properties?
 				if (object.contains("properties")) entity->tiledProperties = object["properties"].get<std::vector<json>>();
+
+				entity->OnEntityCreated();
 
 				// Push our final entity to the list of entities.
 				lEntities[layerCount].push_back(std::move(entity));

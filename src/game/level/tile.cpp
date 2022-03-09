@@ -2,6 +2,11 @@
 #include "rpg/engine.h"
 #include "rpg/level/tile.h"
 
+#include "rpg/states/overworld.h"
+#include "rpg/gamestate.h"
+
+#include <algorithm>
+
 // Base constructor, just adds a tag saying we should
 // render this thing.
 Tile::Tile()
@@ -26,11 +31,12 @@ Tile::Tile(float x, float y, TileData data)
 	imageRect.h = data.rect.h;
 
 	this->data = data;
-	this->texture = EngineResources.textures.GetTexture(data.texture);
+	this->texture = std::shared_ptr<SDL_Texture>(EngineResources.textures.GetTexture(data.texture));
 }
 
 // Render this tile to the screen.
 void Tile::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
-	SDL_RenderCopyF(ren, texture.get(), &imageRect, &destinationRect);
+	Renderable::Draw(win, ren);
+	SDL_RenderCopyF(ren, texture.get(), &imageRect, &renderedRectangle);
 }

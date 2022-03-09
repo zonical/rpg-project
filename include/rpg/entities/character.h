@@ -29,12 +29,13 @@ public:
     void ForcePosition(float x, float y);
     void ResetAllMovement();
 
+    std::array<std::shared_ptr<SDL_Texture>, 4> textures;
+    std::shared_ptr<SDL_Texture> activeTexture;
+
 private:
     int lastValidDirection = 0;
     float lastValidX;
     float lastValidY;
-
-    std::shared_ptr<SDL_Texture> texture;
 
     bool up = false;
     bool down = false;

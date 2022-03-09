@@ -11,39 +11,26 @@
 #define DEFAULT_FONT        "40573_VIDEOTER"
 #define DEFAULT_FONT_SIZE   32
 
-// A struct to define our text settings since we'll have so many parameters for
-// our constructor.
-struct TextSettings
-{
-    float           x = 0.0f;
-    float           y = 0.0f;
-    float           fixedWidth = 0.0f;
-    float           fixedHeight = 0.0f;
-    int             wrappingWidth = 0.0f;
-    int             textSize;
-    std::string     text = "";
-    SDL_Color       color = {255, 255, 255, 255};
-};
-
 // Base class for a textbox in-game.
 class Text : public GUIElement
 {
 private:
+    // Pointers for resources.
     std::shared_ptr<TTF_Font> font = NULL;
     SDL_Texture*    texture = NULL;
 
+    // Current displayed text.
     std::string     text;
-    SDL_Color       textColor;
 
-    int             textSize;
+    // Internally storing the size of the font.
+    int fontSize;
     int             wrappingWidth;
-    bool            customHeight;
-    bool            customWidth;
-public:
-    Text();
-    Text(int layer, std::string elementName, TextSettings settings);
 
-    void Init();
+public:
+    bool isInitalized = false;
+
+    Text();
+    Text(int layer, std::string elementName);
 
     // If this text is static and will NEVER be updated, we will not create a new surface and texture
     // every single frame to render text.
@@ -51,24 +38,25 @@ public:
 
     ~Text()
     {
-        SDL_DestroyTexture(texture);
+        this->font.reset();
+        //SDL_DestroyTexture(texture);
     };
 
     void Draw(SDL_Window*, SDL_Renderer*);
     void SetText(std::string newText) 
     { 
         text = newText; 
-        CreateTextTexture();
+        if (isInitalized) CreateTextTexture();
     };
     void SetTextColor(SDL_Color newColor)
     {
-        textColor = newColor;
-        CreateTextTexture();
+        this->colorModifier = newColor;
+        if (isInitalized) CreateTextTexture();
     };
     void SetFont(std::shared_ptr<TTF_Font> newFont)
     { 
         font = newFont;
-        CreateTextTexture();
+        if (isInitalized) CreateTextTexture();
     };
 
     // Creates a texture and stores it internally.

@@ -61,22 +61,18 @@ void MainMenuState::OnStateActivated()
         std::shared_ptr<BaseMenu> menu(new BaseMenu(this->gGUI.FindFirstFreeLayer(), "mainmenu"));
         mainmenu = menu;
         this->gGUI.AddElement(menu, menu->guiLayer);
-        menu->OnElementSpawned();
 
         // Create our title element.
-        TextSettings textsettings;
-        textsettings.text = "RPG Project - Build: " + std::string(__DATE__) + " " + std::string(__TIME__);
-        textsettings.textSize = 48;
-        textsettings.color = { 255, 255, 255, 255 };
-
-        // Create pointer.
-        std::shared_ptr<Text> title(new Text(this->gGUI.FindFirstFreeLayer(), "mainmenu_title", textsettings));
-        this->gGUI.AddElement(title, title->guiLayer);
-        title->OnElementSpawned();
+        std::shared_ptr<Text> title(new Text(this->gGUI.FindFirstFreeLayer(), "mainmenu_title"));
+        title->SetTextColor({ 255, 255, 255, 255 });
+        title->SetFont(EngineResources.fonts.GetFont("assets/fonts/40573_VIDEOTER", 48));
+        title->SetText("RPG Project - Build: " + std::string(__DATE__) + " " + std::string(__TIME__));
+        title->destinationRect.x = 20;
+        title->destinationRect.y = 20;
 
         // Create a button that allows us to enter into the debug room. Initalizes the Overworld state
         // and sets level to the debug room.
-        auto debugroomText = mainmenu->AddMenuOption("Enter Debug Room", [this]()
+        this->enterDebugRoomText = mainmenu->AddMenuOption("Enter Debug Room", [this]()
             {
                 State_Overworld->ResetState();
                 State_Overworld->gLevel = new Level();
@@ -85,25 +81,50 @@ void MainMenuState::OnStateActivated()
             });
 
         // Set the position of our button.
-        debugroomText->destinationRect.x = 100;
-        debugroomText->destinationRect.y = 100;
+        this->enterDebugRoomText->destinationRect.x = 100;
+        this->enterDebugRoomText->destinationRect.y = 100;
+        this->enterDebugRoomText->SetTextColor({ 255, 255, 255, 255 });
 
         // Create a button that toggles the debug mode state.
-        auto debugmodeText = mainmenu->AddMenuOption("Toggle Debug Mode", [this]()
+        this->toggleDebugModeText = mainmenu->AddMenuOption("Toggle Debug Mode", [this]()
             {
                 GameEngine->debugModeEnabled = !GameEngine->debugModeEnabled;
+
+                // If we're enabled, change our text to green and say "Enabled"
+                if (GameEngine->debugModeEnabled)
+                {
+                    this->toggleDebugModeVisualText->SetTextColor({ 0, 255, 0, 255 });
+                    this->toggleDebugModeVisualText->SetText("Enabled");
+                }
+                // If we're disabled, change our text to red and say "Disabled"
+                else
+                {
+                    this->toggleDebugModeVisualText->SetTextColor({ 255, 0, 0, 255 });
+                    this->toggleDebugModeVisualText->SetText("Disabled");
+                }
+                
             });
 
-        
         // Set the position of our button.
-        debugmodeText->destinationRect.x = 100;
-        debugmodeText->destinationRect.y = 140;
+        this->toggleDebugModeText->destinationRect.x = 100;
+        this->toggleDebugModeText->destinationRect.y = 140;
+        this->toggleDebugModeText->SetTextColor({ 255, 255, 255, 255 });
+
+        // Add special text showing the state of the debug mode.
+        this->toggleDebugModeVisualText = std::shared_ptr<Text>(new Text(this->toggleDebugModeText->guiLayer, "debugtext_mode"));
+        this->toggleDebugModeVisualText->SetTextColor({ 255, 0, 0, 255 });
+        this->toggleDebugModeVisualText->SetFont(EngineResources.fonts.GetFont("40573_VIDEOTER", 48));
+        this->toggleDebugModeVisualText->SetText("Disabled");
+        this->toggleDebugModeVisualText->destinationRect.x = 200;
+        this->toggleDebugModeVisualText->destinationRect.y = 140;
 
         // Add our elements.
-        gGUI.AddElement(debugroomText, debugroomText->guiLayer);    // Debug room button.
-        gGUI.AddElement(debugmodeText, debugmodeText->guiLayer);    // Debug mode toggle button.
+        gGUI.AddElement(title, title->guiLayer);
+        gGUI.AddElement(this->enterDebugRoomText, this->enterDebugRoomText->guiLayer);    // Debug room button.
+        gGUI.AddElement(this->toggleDebugModeText, this->toggleDebugModeText->guiLayer);    // Debug mode toggle button.
+        gGUI.AddElement(this->toggleDebugModeVisualText, this->toggleDebugModeVisualText->guiLayer);    // Debug mode toggle button.
     }
- 
+    BaseGameState::OnStateActivated();
 }
 
 void MainMenuState::OnStateDeactivated()

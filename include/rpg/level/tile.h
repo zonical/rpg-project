@@ -20,6 +20,9 @@ public:
 	std::shared_ptr<SDL_Texture> texture;
 	TileData data;
 
+	// Color modifier for this Tile - This is primarily used for lighting.
+	SDL_Color colorModifier;
+
 	// Render the tile to the screen.
 	void Draw(SDL_Window* win, SDL_Renderer* ren);
  };

@@ -247,6 +247,105 @@
                  "width":16,
                  "x":1904,
                  "y":256
+                }, 
+                {
+                 "height":0,
+                 "id":25,
+                 "name":"Light Test",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"color_b",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"color_g",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"color_r",
+                         "type":"int",
+                         "value":255
+                        }, 
+                        {
+                         "name":"intensity",
+                         "type":"int",
+                         "value":200
+                        }],
+                 "rotation":0,
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":384,
+                 "y":448
+                }, 
+                {
+                 "height":0,
+                 "id":27,
+                 "name":"Light Test",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"color_b",
+                         "type":"int",
+                         "value":255
+                        }, 
+                        {
+                         "name":"color_g",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"color_r",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"intensity",
+                         "type":"int",
+                         "value":100
+                        }],
+                 "rotation":0,
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":768,
+                 "y":448
+                }, 
+                {
+                 "height":0,
+                 "id":28,
+                 "name":"Light Test",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"color_b",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"color_g",
+                         "type":"int",
+                         "value":255
+                        }, 
+                        {
+                         "name":"color_r",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
+                         "name":"intensity",
+                         "type":"int",
+                         "value":100
+                        }],
+                 "rotation":0,
+                 "type":"light",
+                 "visible":true,
+                 "width":0,
+                 "x":576,
+                 "y":448
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -255,7 +354,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":21,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.7.2",

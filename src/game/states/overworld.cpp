@@ -2,6 +2,11 @@
 #include "rpg/states/overworld.h"
 #include "rpg/gui/text.h"
 #include "rpg/states/mainmenu.h"
+#include "rpg/entities/light.h"
+
+#include <algorithm>
+#include <cmath>
+
 // Wake up our entities and GUI elements once everything has been constructed.
 void OverworldState::OnLevelLoaded()
 {
@@ -27,15 +32,9 @@ void OverworldState::OnLevelLoaded()
         }
     }
 
-    // Create a new debug text element and populate it with information.
-    TextSettings debugTextSettings;
-    debugTextSettings.wrappingWidth = DEFAULT_SCREEN_WIDTH;
-    debugTextSettings.fixedHeight = 250;
-    debugTextSettings.textSize = 24;
-
-    std::shared_ptr<Text> ptr(new Text(MAX_GUI_LAYERS - 1, "debugText", debugTextSettings));
-    gGUI.AddElement(ptr, ptr->guiLayer);
-    ptr->OnElementSpawned();
+    std::shared_ptr<Text> fpsText(new Text(MAX_GUI_LAYERS - 1, "fpsText"));
+    fpsText->SetTextColor({ 255, 255, 255, 255 });
+    gGUI.AddElement(fpsText, fpsText->guiLayer);
 }
 
 // If our level is being destroyed, we'll completely remove all screen elements so we can
@@ -126,34 +125,18 @@ void OverworldState::Update(float dT)
     // If we have debug mode enabled, we'll update our debug text element.
     if (GameEngine->debugModeEnabled)
     {
-        auto element = dynamic_cast<Text*>(gGUI.GetElement("debugText"));
+        auto element = dynamic_cast<Text*>(gGUI.GetElement("fpsText"));
         if (element != nullptr)
         {
             // Update our text with information.
             std::stringstream fpsText;
-
-            int guiElementCount = 0;
-            for (auto& layer : gGUI.elements) guiElementCount += layer.size();
-
-            int entityCount = 0;
-            for (auto& layer : gLevel->lEntities) entityCount += layer.size();
-
-            fpsText << "FPS: " << floor(GameEngine->fps) << '\n'
-                << "Player xPos: " << gLevel->GetCharacter()->levelX << '\n'
-                << "Player yPos: " << gLevel->GetCharacter()->levelY << '\n'
-                << "Frame: " << GameEngine->frame << '\n'
-                << "Elapsed Time: " << GameEngine->elapsedTime << '\n'
-                << "Entity Count: " << entityCount << '\n'
-                << "GUI Element Count: " << guiElementCount << '\n'
-                ;
-
-            element->SetText(fpsText.str());
+            element->SetText(std::to_string(floor(GameEngine->fps)));
         }
     }
     else
     {
         // Set our text to nothing.
-        auto element = dynamic_cast<Text*>(gGUI.GetElement("debugText"));
+        auto element = dynamic_cast<Text*>(gGUI.GetElement("fpsText"));
         if (element != nullptr)
         {
             element->SetText("");
@@ -215,11 +198,53 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
             SDL_FRect checkRect = { tile->levelX, tile->levelY, tile->destinationRect.w, tile->destinationRect.h };
 
             // Are we in the camera's view?
-            if (!CollisionCheckF(EngineResources.camera, checkRect)) continue;
-
+            if (this->tileCullingType == CULLING_STANDARD || this->tileCullingType == CULLING_NO_LIGHTS)
+            {
+                if (!CollisionCheckF(EngineResources.camera, checkRect)) continue;
+            }
+            
             // Call the tiles' render function.
             if (tile->HasTag(Tag_Renderable) || !tile->HasTag(Tag_NotRendering))
             {
+                // Get the position of our mouse.
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                
+                // Calculate our lighting.
+                SDL_Color finalLight = CalculateLightingFromPositionToTile(x + EngineResources.camera.x, y + EngineResources.camera.y, tile.get(), { 255, 255, 255 }, 60);
+
+                // Add our existing tile color data.
+                finalLight.r = (int)std::min(tile->colorModifier.r + finalLight.r, 255);
+                finalLight.g = (int)std::min(tile->colorModifier.g + finalLight.g, 255);
+                finalLight.b = (int)std::min(tile->colorModifier.b + finalLight.b, 255);
+
+                // If our tile is completely black, don't bother rendering it.
+                if (this->tileCullingType == CULLING_STANDARD)
+                {
+                    if (finalLight.r == 0 && finalLight.g == 0 && finalLight.b == 0) continue;
+                }
+
+                // Are we rendering some debug properties?
+                switch (this->lightingRenderType)
+                {
+                    case LIGHTING_FILL: // Fills all tiles with just filled rectangles showing the light.
+                    {
+                        SDL_SetRenderDrawColor(ren, finalLight.r, finalLight.g, finalLight.b, 255);
+                        SDL_RenderFillRectF(ren, &tile->destinationRect);
+                        break;
+                    }
+                    case LIGHTING_BORDER:
+                    {
+                        SDL_SetRenderDrawColor(ren, finalLight.r, finalLight.g, finalLight.b, 255);
+                        SDL_RenderDrawRectF(ren, &tile->destinationRect);
+                        break;
+                    }
+                }
+
+                SDL_SetTextureColorMod(tile->texture.get(), finalLight.r, finalLight.g, finalLight.b);
+
+                // Draw our final tile.
+                tile->scaleMultiplier = this->scaleMultiplier;
                 tile->Draw(win, ren);
             }
         }
@@ -239,6 +264,8 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
             // Call the entities render function.
             if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
             {
+                // Draw our final entity.
+                entity->scaleMultiplier = this->scaleMultiplier;
                 entity->Draw(win, ren);
             }
         }
@@ -262,10 +289,55 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
 
 void OverworldState::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released, bool repeat)
 {
-    if (keyCode == SDLK_ESCAPE)
+    if (pressed && !repeat)
     {
-        GameEngine->ChangeGameState(State_MainMenu);
+        switch (keyCode)
+        {
+            case SDLK_ESCAPE: GameEngine->ChangeGameState(State_MainMenu); break;
+            case SDLK_TAB: selection++; break;
+            case SDLK_LSHIFT: selection--; break;
+
+            case SDLK_1:
+            {
+                if (selection == SELECT_LIGHTING)
+                {
+                    this->lightingRenderType = LIGHTING_STANDARD; break;
+                }
+                else if (selection == SELECT_TILECULLING)
+                {
+                    this->tileCullingType = CULLING_STANDARD; break;
+                }
+            }
+            case SDLK_2:
+            {
+                if (selection == SELECT_LIGHTING)
+                {
+                    this->lightingRenderType = LIGHTING_DISABLED; break;
+                }
+                else if (selection == SELECT_TILECULLING)
+                {
+                    this->tileCullingType = CULLING_NO_LIGHTS; break;
+                }
+            }
+            case SDLK_3:
+            {
+                if (selection == SELECT_LIGHTING)
+                {
+                    this->lightingRenderType = LIGHTING_BORDER; break;
+                }
+                else if (selection == SELECT_TILECULLING)
+                {
+                    this->tileCullingType = CULLING_DISABLED; break;
+                }
+            }
+
+            case SDLK_4:
+            {
+                if (selection == SELECT_LIGHTING)   this->lightingRenderType = LIGHTING_FILL; break;
+        }
+        }
     }
+    
 
     if (gLevel != nullptr)
     {
@@ -288,4 +360,9 @@ void OverworldState::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool rel
             element->OnKeyboardInput(keyCode, pressed, !pressed, repeat);
         }
     }
+}
+
+void OverworldState::OnMouseWheelScrolled(int x, int y, int direction)
+{
+
 }

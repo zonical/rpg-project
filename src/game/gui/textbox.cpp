@@ -20,7 +20,6 @@ Textbox::Textbox(int layer, std::string elementName, int textboxType) : GUIEleme
 void Textbox::OnElementSpawned()
 {
     // This struct is responsible for the settings on our Text element.
-    TextSettings textSettings;
 
     try
     {
@@ -42,15 +41,6 @@ void Textbox::OnElementSpawned()
         destinationRect.w = settings["width"].get<float>();
         destinationRect.h = settings["height"].get<float>();
 
-        // Width and height of the text.
-        textSettings.wrappingWidth = settings["width"].get<float>() - this->borderSize - padding;
-
-        textSettings.x = settings["x"].get<float>() + this->borderSize + padding;
-        textSettings.y = settings["y"].get<float>() + this->borderSize + padding;
-
-        // The size of the text we should use for this box.
-        textSettings.textSize = settings["text_size"].get<int>();
-
         // Grab our background colors.
         auto bgColor = settings["bgColor"].get<json>();
         this->bgColor.r = bgColor["r"].get<float>();
@@ -64,21 +54,24 @@ void Textbox::OnElementSpawned()
         this->borderColor.g = borderColor["g"].get<float>();
         this->borderColor.b = borderColor["b"].get<float>();
         this->borderColor.a = borderColor["a"].get<float>();
+
+        // Create our textbox text.
+        this->boxText = std::shared_ptr<Text>(new Text(GameEngine->gameState->gGUI.FindFirstFreeLayer(),this->elementName + "_text"));
+        this->boxText->destinationRect.x = settings["x"].get<float>() + this->borderSize + padding;
+        this->boxText->destinationRect.y = settings["y"].get<float>() + this->borderSize + padding;
+        this->boxText->SetTextColor({ 255, 0, 0, 255 });
+        this->boxText->SetFont(EngineResources.fonts.GetFont("40573_VIDEOTER", settings["text_size"].get<int>()));
+        this->boxText->SetText("");
+
+        GameEngine->gameState->gGUI.AddElement(this->boxText, this->boxText->guiLayer);
+        boxText->OnElementSpawned();
+        printf("[TEXTBOX] Loaded textbox %d.\n", type);
     }
     // If we run into a processing error, catch here and report.
     catch (std::exception& Exception)
     {
         printf("[TEXTBOX] Failed to load textbox types: %s\n", Exception.what());
     }
-
-    std::shared_ptr<Text> ptr(
-        new Text(GameEngine->gameState->gGUI.FindFirstFreeLayer(), 
-        this->elementName + "_text", textSettings));
-    boxText = ptr;
-    GameEngine->gameState->gGUI.AddElement(ptr, ptr->guiLayer);
-    boxText->OnElementSpawned();
-
-    printf("[TEXTBOX] Loaded textbox %d.\n", type);
 }
 
 void Textbox::Update(float dT)

@@ -11,11 +11,17 @@ Character::Character() : Entity()
     this->AddTag(Tag_Collision);
     this->AddTag("Character");
 
+    // Load all of our textures.
+    textures[0] = EngineResources.textures.GetTexture("assets/sprites/character/chara_front.png");
+    textures[1] = EngineResources.textures.GetTexture("assets/sprites/character/chara_left.png");
+    textures[2] = EngineResources.textures.GetTexture("assets/sprites/character/chara_right.png");
+    textures[3] = EngineResources.textures.GetTexture("assets/sprites/character/chara_back.png");
 }
 
 void Character::OnEntitySpawned()
 {
-    texture = EngineResources.textures.GetTexture("assets/sprites/the_man.png");
+    // Set our default texture to be the front sprite.
+    activeTexture = textures[0];
 
     // Set our position.
     levelX += -(this->w() / 2);
@@ -26,7 +32,7 @@ void Character::OnEntitySpawned()
     destinationRect.h = 64;
 
     collisionRect.w = 32;
-    collisionRect.h = 32;
+    collisionRect.h = 42;
 
     // Set the position of our camera to be the X and Y position of our character minus
     // our camera offset. This is calculated by dividing the screen width and height
@@ -57,10 +63,10 @@ void Character::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released
     {
         switch (keyCode)
         {
-            case SDLK_w: up     = true; break;
-            case SDLK_a: left   = true; break;
-            case SDLK_s: down   = true; break;
-            case SDLK_d: right  = true; break;
+            case SDLK_w: up = true; lastValidDirection = 3; break;
+            case SDLK_a: left = true; lastValidDirection = 1; break;
+            case SDLK_s: down = true; lastValidDirection = 0; break;
+            case SDLK_d: right = true; lastValidDirection = 2; break;
             case SDLK_q:
             {
                 if (!repeat) use = true; 
@@ -91,8 +97,10 @@ void Character::Update(float dT)
     this->dT = dT;
 
     HandleMovement();
-
     if (use) HandleUsing();
+
+    // Set our active texture.
+    activeTexture = this->textures[this->lastValidDirection];
 }
 
 void Character::Move(float x, float y)
@@ -275,6 +283,7 @@ void Character::HandleUsing()
 void Character::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
     // Render our character.
-    SDL_RenderCopyF(ren, this->texture.get(), NULL, &destinationRect);
+    Renderable::Draw(win, ren);
+    SDL_RenderCopyF(ren, this->activeTexture.get(), NULL, &renderedRectangle);
     return;
 }

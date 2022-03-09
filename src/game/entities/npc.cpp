@@ -113,6 +113,7 @@ void NPCEntity::OnUseFinished(Entity* activator)
 void NPCEntity::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
     // Render our character.
-    SDL_RenderCopyF(ren, this->npctexture.get(), NULL, &destinationRect);
+    Renderable::Draw(win, ren);
+    SDL_RenderCopyF(ren, this->npctexture.get(), NULL, &renderedRectangle);
     return;
 }

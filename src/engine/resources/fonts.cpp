@@ -9,7 +9,7 @@
 
 void DestroyFontPointer(TTF_Font* p)
 {
-    TTF_CloseFont(p);
+    //TTF_CloseFont(p);
 }
 
 void FontManager::Initalize()

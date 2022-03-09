@@ -19,6 +19,7 @@ public:
     std::string classname;
     std::string targetname;
 
+    virtual void OnEntityCreated() {};
     virtual void OnEntitySpawned() {};
     virtual void OnEntityDestroyed() {};
 
@@ -33,6 +34,9 @@ public:
     float           useDistance = 0.0f; // Distance the Character needs to be away to trigger OnUse().
     virtual void    OnUse(Entity* activator) {};
     virtual void    OnUseFinished(Entity* activator) {};
+
+    // Color modifier for this entity - This is primarily used for lighting.
+    SDL_Color colorModifier;
 
     // Custom properties from Tiled.
     using json = nlohmann::json;

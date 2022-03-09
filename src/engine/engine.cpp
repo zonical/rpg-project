@@ -23,13 +23,11 @@ void Engine::ChangeGameState(BaseGameState* newState)
     if (gameState)
     {
         gameState->OnStateDeactivated();
-        std::cout << "[ENGINE] Deactivated state: " << gameState->name << std::endl;
     }
 
     // Set our new state and activatei t.
     gameState = newState;
     gameState->OnStateActivated();
-    std::cout << "[ENGINE] Activated state: " << gameState->name << std::endl;
 }
 
 // Updates all of our dynamic elements in the engine every frame with the
@@ -57,6 +55,10 @@ void Engine::Update(double dT)
                 // Call the gamestate keyboard input function.
                 bool pressed = (event.type == SDL_KEYDOWN);
                 gameState->OnKeyboardInput(event.key.keysym.sym, pressed, !pressed, event.key.repeat);
+            }
+            case SDL_MOUSEWHEEL:
+            {
+                gameState->OnMouseWheelScrolled(event.wheel.x, event.wheel.y, -1);
             }
         }
     }

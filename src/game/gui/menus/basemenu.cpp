@@ -17,12 +17,16 @@ BaseMenu::~BaseMenu()
 // Draw our menu to the screen.
 void BaseMenu::Draw(SDL_Window* win, SDL_Renderer* ren)
 {
-	// Our text elements will handle drawing themselves. What we'll do here is
-	// also render an outline around the destination rect of our selected element.
+	// Our text elements will handle drawing themselves. We'll highlight the selected one.
 	auto element = textOptions[CurrentlySelectedOption];
-	
-	SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
-	SDL_RenderDrawRectF(ren, &element->destinationRect);
+	element->SetTextColor({ 255, 255, 0, 255 });
+
+	// Reset our override colors for other elements.
+	for (int i = 0; i < textOptions.size(); i++)
+	{
+		if (i == CurrentlySelectedOption) continue;
+		textOptions[i]->SetTextColor({255, 255, 255, 255}); // Set to white.
+	}
 }
 
 // Constructs a new menu option. This will add a new struct object to our array and
@@ -34,18 +38,13 @@ std::shared_ptr<Text> BaseMenu::AddMenuOption(std::string name, MenuFunction fun
 	MenuOption option = { name, function };
 	options.push_back(option);
 
-	// Create some information for our text.
-	TextSettings textSettings;
-	textSettings.text = name;
-	textSettings.textSize = 24;
-	textSettings.color = { 255, 255, 255, 255 };
-
 	// Construct our element name.
 	std::string text_elementName = this->elementName + "_option_" + std::to_string(textOptions.size() + 1);
 
 	// Construct a new element pointer.
-	std::shared_ptr<Text> ptr(new Text(this->guiLayer, text_elementName, textSettings));
+	std::shared_ptr<Text> ptr(new Text(this->guiLayer, text_elementName));
 	ptr->SetText(name);
+	ptr->SetTextColor({ 255, 255, 255, 255 });
 	textOptions.push_back(ptr);
 	return ptr;
 }
