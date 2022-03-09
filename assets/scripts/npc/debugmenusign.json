@@ -1,0 +1,8 @@
+{
+    "onUse": {
+        "action": "dialogueOpen",
+        "dialogueBoxType" : 0,
+        "messageFile": "assets/scripts/text/test_dialogue.json"
+    }
+
+}

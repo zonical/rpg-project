@@ -1,11 +1,8 @@
 
 /Release/*
 /Debug/*
-/bin/main.exe
-/bin/main.pdb
-/bin/main.exp
-/bin/main.lib
-/lib/*.dll
+/bin/*
+/lib/*
 include/
 !include/rpg
 *.vcxproj*
