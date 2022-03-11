@@ -39,7 +39,7 @@ void NPCEntity::Update(float dT)
         // Is it completely finished and the user has exited out of it?
         if (this->textbox->IsDialogueFinished())
         {
-            State_Overworld->gGUI.RemoveElement(textbox->elementName, textbox->guiLayer);
+            GameEngine->GetOverworldState()->gGUI.RemoveElement(textbox->elementName, textbox->guiLayer);
             this->textbox.reset();
             OnUseFinished(useActivator);
         }
@@ -76,9 +76,9 @@ void NPCEntity::OnUse(Entity* activator)
                 auto textboxType = useObj["dialogueBoxType"].get<int>();
 
                 std::string elementName = npcName + "_textbox";
-                std::shared_ptr<Textbox> ptr(new Textbox(State_Overworld->gGUI.FindFirstFreeLayer(), elementName, textboxType));
+                std::shared_ptr<Textbox> ptr(new Textbox(GameEngine->GetOverworldState()->gGUI.FindFirstFreeLayer(), elementName, textboxType));
+                GameEngine->GetOverworldState()->gGUI.AddElement(textbox, textbox->guiLayer);
                 textbox = ptr;
-                State_Overworld->gGUI.AddElement(ptr, ptr->guiLayer);
                 textbox->OnElementSpawned();
 
                 // Load our dialogue.

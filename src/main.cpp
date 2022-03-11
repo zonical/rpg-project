@@ -1,7 +1,7 @@
 #define SDL_MAIN_HANDLED
 #include "rpg/rpg.h"
-
 #include "rpg/states/mainmenu.h"
+#include "rpg/states/overworld.h"
 #include "rpg/gui/menus/basemenu.h"
 
 #include <ctime>
@@ -40,6 +40,14 @@ bool Engine::Initalize()
     gResources.dialogue.Initalize();
     gResources.tilesets.Initalize();
 
+    // Create our modules.
+    PyImport_AppendInittab("Engine", PyInit_engine);
+
+    // Initalize Python.
+    Py_Initialize();
+
+    if (!Py_IsInitialized()) return false;
+    printf("[PYTHON] Initalized Python %s\n", PY_VERSION);
     return true;
 }
 
@@ -47,23 +55,19 @@ void Engine::Shutdown()
 {
     // Free all resources from our states.
     gameState = nullptr;
-
-    for (auto& state : states)
-    { 
-        state->ResetState();
-    }
    
     // Free all of our renderer resources.
     gResources.Shutdown();
 
     // Finally, quit all of our systems.
+    Py_Finalize();
     TTF_Quit();
     SDL_Quit();
 }
 
 void Engine::MainLoop()
 {
-    ChangeGameState(State_MainMenu);
+    ChangeGameState(this->GetMainMenuState());
 
     // Initalize values keeping time and dealing with frames
     // in this loop.

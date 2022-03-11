@@ -5,13 +5,18 @@
 #include "json/json.hpp"
 
 #include "rpg/gamestate.h"
+#include "rpg/states/overworld.h"
+#include "rpg/states/mainmenu.h"
 #include "rpg/resources.h"
-#include "rpg/entity.h"
-#include "rpg/level/level.h"
 
 #include <stdio.h>
 #include <string>
 #include <iostream>
+
+#define DefineGameState(State) State* BOOST_PP_CAT(Get, State)() { return State::instance(); }
+
+#define DEFAULT_SCREEN_WIDTH 1200
+#define DEFAULT_SCREEN_HEIGHT 700
 
 class Engine
 {
@@ -32,11 +37,13 @@ public:
     
     // The current gamestate.
     BaseGameState* gameState;
-    std::vector<BaseGameState*> states;
-
     // Change game state. This calls helper functions for activating and deactiviating a state.
     void ChangeGameState(BaseGameState* newState);
-    
+
+    // Define game states here. These will be globally accessable.
+    DefineGameState(OverworldState);
+    DefineGameState(MainMenuState);
+
     // Resource manager object, handles rendering.
     Resources gResources;
     // Time elapsed in 1/10ths of a second.
@@ -58,5 +65,9 @@ public:
     
 #define EngineResources \
     GameEngine->gResources
+
+// Python module init function. This is required in every header file for classes that
+// might expose C++ functions to Python!
+extern "C" BOOST_SYMBOL_EXPORT PyObject * PyInit_engine();
 
 #endif

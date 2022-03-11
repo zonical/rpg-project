@@ -6,3 +6,4 @@
 include/SDL
 include/json
 *.vcxproj*
+__pycache__

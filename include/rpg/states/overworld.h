@@ -31,10 +31,7 @@ enum DEBUG_TILECULLING_TYPE
 class OverworldState : public BaseGameState
 {
 public:
-	OverworldState()
-	{
-		GameEngine->states.push_back(this);
-	}
+	OverworldState();
 
 	// The current game level.
 	Level* gLevel;
@@ -60,9 +57,11 @@ public:
 	{
 	};
 
-	// Pause menu related stuff.
-	void CreatePauseMenu();
-	void DestroyPauseMenu();
+	// The camera that everything revolves around.
+	SDL_FRect camera;
+
+	// Offsets the camera by a certain amount.
+	void OffsetCamera(int x, int y);
 
 	// Debug.
 	int tilesRendered = 0;
@@ -84,7 +83,6 @@ public:
 
 	// If we get a keyboard event, intercept it and pass it onto our GUI and entities.
 	void OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released, bool repeat);
-	void OnMouseWheelScrolled(int x, int y, int direction);
 
 	~OverworldState()
 	{
@@ -98,7 +96,5 @@ public:
 		return &instance;
 	};
 };
-
-#define State_Overworld OverworldState::instance()
 
 #endif

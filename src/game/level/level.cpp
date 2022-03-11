@@ -63,6 +63,11 @@ bool Level::LoadLevel(std::string levelPath)
 	// Load our level.
 	auto levelData = GameEngine->LoadJSON(levelPath);
 
+	// Remove part of our string for our levelname.
+	this->levelName = levelPath;
+	this->levelName.replace(this->levelName.find("assets/levels"), std::string("assets/levels/").length(), "");
+	this->levelName.replace(this->levelName.find(".json"), std::string(".json").length(), "");
+
 	// Create our entities.
 	CreateEntities(levelData);
 

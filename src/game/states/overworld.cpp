@@ -4,6 +4,10 @@
 #include "rpg/gui/text.h"
 #include "rpg/entities/light.h"
 
+OverworldState::OverworldState()
+{
+   this->camera = { 0, 0, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
+}
 
 // Wake up our entities and GUI elements once everything has been constructed.
 void OverworldState::OnLevelLoaded()
@@ -33,6 +37,32 @@ void OverworldState::OnLevelLoaded()
     std::shared_ptr<Text> fpsText(new Text(MAX_GUI_LAYERS - 1, "fpsText"));
     fpsText->SetTextColor({ 255, 255, 255, 255 });
     gGUI.AddElement(fpsText, fpsText->guiLayer);
+
+    // We're going to call a Python script based on the level if we want to do anything
+    // special on load.
+    
+    // Construct file path: import assets.scripts.levels.(name)
+    std::string path = "assets.scripts.levels." + this->gLevel->levelName;
+
+    try
+    {
+        auto main_module = boost::python::import(path.c_str());
+        auto main_namespace = main_module.attr("__dict__");
+
+        // Load a script file and execute it. It will define some functions for us which
+        // we can grab and run.
+        auto file_result = boost::python::exec("OnLevelLoaded()", main_namespace);
+        
+        // Run our file.
+        //boost::python::exec("OnLevelLoaded()", main_namespace);
+    }
+    catch (boost::python::error_already_set const&)
+    {
+        // handle the exception in some way
+        printf("[PYTHON] EXCEPTION REPORTED\n");
+        PyErr_Print();
+    }
+
 }
 
 // If our level is being destroyed, we'll completely remove all screen elements so we can
@@ -177,8 +207,8 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
     // Offset our collision rectangles by the camera.
     for (auto& obj : gLevel->lCollisionR)
     {
-        obj.collisionRect.x = obj.levelX - EngineResources.camera.x;
-        obj.collisionRect.y = obj.levelY - EngineResources.camera.y;
+        obj.collisionRect.x = obj.levelX - this->camera.x;
+        obj.collisionRect.y = obj.levelY - this->camera.y;
     }
 
     // There can be up to 16 different layers for both entities and tiles. To allow for
@@ -190,15 +220,15 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
         for (auto& tile : gLevel->lTiles[i])
         {
             // Manipulate the destinationRect of this tile to be offset by the camera.
-            tile->destinationRect.x = tile->levelX - EngineResources.camera.x;
-            tile->destinationRect.y = tile->levelY - EngineResources.camera.y;
+            tile->destinationRect.x = tile->levelX - this->camera.x;
+            tile->destinationRect.y = tile->levelY - this->camera.y;
 
             SDL_FRect checkRect = { tile->levelX, tile->levelY, tile->destinationRect.w, tile->destinationRect.h };
 
             // Are we in the camera's view?
             if (this->tileCullingType == CULLING_STANDARD || this->tileCullingType == CULLING_NO_LIGHTS)
             {
-                if (!CollisionCheckF(EngineResources.camera, checkRect)) continue;
+                if (!CollisionCheckF(this->camera, checkRect)) continue;
             }
             
             // Call the tiles' render function.
@@ -209,7 +239,7 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
                 SDL_GetMouseState(&x, &y);
                 
                 // Calculate our lighting.
-                SDL_Color finalLight = CalculateLightingFromPositionToTile(x + EngineResources.camera.x, y + EngineResources.camera.y, tile.get(), { 255, 255, 255 }, 60);
+                SDL_Color finalLight = CalculateLightingFromPositionToTile(x + this->camera.x, y + this->camera.y, tile.get(), { 255, 255, 255 }, 60);
 
                 // Add our existing tile color data.
                 finalLight.r = (int)std::min(tile->colorModifier.r + finalLight.r, 255);
@@ -251,13 +281,13 @@ void OverworldState::Draw(SDL_Window* win, SDL_Renderer* ren)
         for (auto& entity : gLevel->lEntities[i])
         {
             // Manipulate the destinationRect of this tile to be offset by the camera.
-            entity->destinationRect.x = entity->levelX - EngineResources.camera.x;
-            entity->destinationRect.y = entity->levelY - EngineResources.camera.y;
+            entity->destinationRect.x = entity->levelX - this->camera.x;
+            entity->destinationRect.y = entity->levelY - this->camera.y;
 
             SDL_FRect checkRect = { entity->levelX, entity->levelY, entity->destinationRect.w, entity->destinationRect.h };
 
             // Are we in the camera's view?
-            if (!CollisionCheckF(EngineResources.camera, checkRect)) continue;
+            if (!CollisionCheckF(this->camera, checkRect)) continue;
 
             // Call the entities render function.
             if (entity->HasTag(Tag_Renderable) || !entity->HasTag(Tag_NotRendering))
@@ -291,7 +321,7 @@ void OverworldState::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool rel
     {
         switch (keyCode)
         {
-            case SDLK_ESCAPE: GameEngine->ChangeGameState(State_MainMenu); break;
+            case SDLK_ESCAPE: GameEngine->ChangeGameState(GameEngine->GetMainMenuState()); break;
             case SDLK_TAB: selection++; break;
             case SDLK_LSHIFT: selection--; break;
 
@@ -360,7 +390,8 @@ void OverworldState::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool rel
     }
 }
 
-void OverworldState::OnMouseWheelScrolled(int x, int y, int direction)
+void OverworldState::OffsetCamera(int x, int y)
 {
-
+    this->camera.x += x;
+    this->camera.y += y;
 }

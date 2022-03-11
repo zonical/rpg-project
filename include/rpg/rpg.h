@@ -1,9 +1,18 @@
 #pragma once
 
-// Define Python.h here before we include anything from the standard library.
-// This is recommended by the official documentation: https://docs.python.org/3/extending/extending.html
-#define PY_SSIZE_T_CLEAN		/* Make "s#" use Py_ssize_t rather than int. (https://docs.python.org/3/extending/extending.html#parsetuple) */
-#include <Python.h>
+// Boost.
+#define BOOST_PYTHON_STATIC_LIB
+#include <boost/python.hpp>
+
+#ifdef _DEBUG
+#pragma comment(lib, "python3_d.lib")
+#pragma comment(lib, "python310_d.lib")
+#pragma comment(lib, "libboost_python310-vc142-mt-gd-x32-1_77.lib")
+#else
+#pragma comment(lib, "python3.lib")
+#pragma comment(lib, "python310.lib")
+#pragma comment(lib, "libboost_python310-vc142-mt-x32-1_77.lib")
+#endif
 
 // Core engine files.
 #include "rpg/engine.h"						// Defines the engine class.

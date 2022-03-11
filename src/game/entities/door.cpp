@@ -19,10 +19,10 @@ void DoorEntity::OnEntitySpawned()
 
 void DoorEntity::Update(float dT)
 {
-	if (State_Overworld->gLevelTransData.transitionFlag) return;
+	if (GameEngine->GetOverworldState()->gLevelTransData.transitionFlag) return;
 
 	// Grab our character entity.
-	Character* character = State_Overworld->gLevel->GetCharacter();
+	Character* character = GameEngine->GetOverworldState()->gLevel->GetCharacter();
 
 	// Check to see if the character is colliding with us. If they are,
 	// perform our level transition.
@@ -36,9 +36,9 @@ void DoorEntity::Update(float dT)
 
 		// Set our level transition data in the engine so the engine knows what
 		// to do when the next Character entity spawns in.
-		State_Overworld->gLevelTransData.landmark_name = this->landmarkName;
-		State_Overworld->gLevelTransData.new_level = this->levelDestination;
-		State_Overworld->gLevelTransData.transitionFlag = true;
+		GameEngine->GetOverworldState()->gLevelTransData.landmark_name = this->landmarkName;
+		GameEngine->GetOverworldState()->gLevelTransData.new_level = this->levelDestination;
+		GameEngine->GetOverworldState()->gLevelTransData.transitionFlag = true;
 
 		// Exit, we'll be deleted soon.
 		return;

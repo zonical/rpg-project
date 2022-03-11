@@ -6,7 +6,6 @@
 // Create our inital menu.
 MainMenuState::MainMenuState()
 {
-    GameEngine->states.push_back(this);
 }
 
 // Update everything in this state including entities and the GUI.
@@ -74,10 +73,10 @@ void MainMenuState::OnStateActivated()
         // and sets level to the debug room.
         this->enterDebugRoomText = mainmenu->AddMenuOption("Enter Debug Room", [this]()
             {
-                State_Overworld->ResetState();
-                State_Overworld->gLevel = new Level();
-                State_Overworld->gLevel->LoadLevel("assets/levels/debug_room.json");
-                GameEngine->ChangeGameState(State_Overworld);
+                GameEngine->GetOverworldState()->ResetState();
+                GameEngine->GetOverworldState()->gLevel = new Level();
+                GameEngine->GetOverworldState()->gLevel->LoadLevel("assets/levels/debug_room.json");
+                GameEngine->ChangeGameState(GameEngine->GetOverworldState());
             });
 
         // Set the position of our button.

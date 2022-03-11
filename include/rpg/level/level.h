@@ -33,6 +33,9 @@ public:
 	Level();
 	~Level();
 
+	// Level name. This does not include "assets/level"
+	std::string levelName;
+
 	// Grab the character that we control.
 	Character* GetCharacter();
 

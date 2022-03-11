@@ -34,8 +34,8 @@ void Character::OnEntitySpawned()
     // Set the position of our camera to be the X and Y position of our character minus
     // our camera offset. This is calculated by dividing the screen width and height
     // by two and subtracting the height and width of the character so it's perfectly centered.
-    EngineResources.camera.x = levelX - (DEFAULT_SCREEN_WIDTH / 2) + (this->w() / 2);
-    EngineResources.camera.y = levelY - (DEFAULT_SCREEN_HEIGHT / 2) + (this->h() / 2);
+    GameEngine->GetOverworldState()->camera.x = levelX - (DEFAULT_SCREEN_WIDTH / 2) + (this->w() / 2);
+    GameEngine->GetOverworldState()->camera.y = levelY - (DEFAULT_SCREEN_HEIGHT / 2) + (this->h() / 2);
 }
 
 void Character::OnKeyboardInput(SDL_Keycode keyCode, bool pressed, bool released, bool repeat)
@@ -103,19 +103,19 @@ void Character::Update(float dT)
 void Character::Move(float x, float y)
 {
     this->levelX += x;
-    EngineResources.camera.x += x;
+    GameEngine->GetOverworldState()->camera.x += x;
 
     this->levelY += y;
-    EngineResources.camera.y += y;
+    GameEngine->GetOverworldState()->camera.y += y;
 }
 
 void Character::ForcePosition(float x, float y)
 {
     this->levelX = x;
-    EngineResources.camera.x = levelX - (DEFAULT_SCREEN_WIDTH / 2) + (this->w() / 2);
+    GameEngine->GetOverworldState()->camera.x = levelX - (DEFAULT_SCREEN_WIDTH / 2) + (this->w() / 2);
 
     this->levelY = y;
-    EngineResources.camera.y = levelY - (DEFAULT_SCREEN_HEIGHT / 2) + (this->h() / 2);
+    GameEngine->GetOverworldState()->camera.y = levelY - (DEFAULT_SCREEN_HEIGHT / 2) + (this->h() / 2);
 }
 
 void Character::ResetAllMovement()
@@ -159,9 +159,9 @@ bool SDL_FIntersectRect(SDL_FRect a, SDL_FRect b)
 
 bool DoesAnythingIntersect(SDL_FRect testRect)
 {
-    if (State_Overworld->gLevel == nullptr) return false;
+    if (GameEngine->GetOverworldState()->gLevel == nullptr) return false;
     // Do collision detection with all of our collision objects in the level.
-    for (auto& collisionRect : State_Overworld->gLevel->lCollisionR)
+    for (auto& collisionRect : GameEngine->GetOverworldState()->gLevel->lCollisionR)
     {
         if (SDL_FIntersectRect(collisionRect.collisionRect, testRect))
         {
@@ -245,13 +245,13 @@ void Character::HandleUsing()
 {
     // Check to see our distance between all of our current level entities.
     // If we're within range, trigger the first entity and perform OnUse().
-    if (State_Overworld->gLevel == nullptr) return;
+    if (GameEngine->GetOverworldState()->gLevel == nullptr) return;
 
     // If we're currently using another entity, don't process another Use
     // event until we're out of it.
     if (this->isCurrentlyUsed) return;
 
-    for (auto& entLayer : State_Overworld->gLevel->lEntities)
+    for (auto& entLayer : GameEngine->GetOverworldState()->gLevel->lEntities)
     {
         for (auto& ent : entLayer)
         {

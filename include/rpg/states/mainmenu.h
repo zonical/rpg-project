@@ -66,6 +66,4 @@ public:
 	}
 };
 
-#define State_MainMenu MainMenuState::instance()
-
 #endif
